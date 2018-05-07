@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../../lib/pkp/dtd/locale.dtd">
+
+<!--
+  * plugins/generic/clamav/locale/en_US/locale.xml
+  *
+  * Copyright (c) 2018 University of Pittsburgh
+  * Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
+  *
+  * Clam AV plugin localization strings
+  -->
+ 
+<locale name="en_US" full_name="U.S. English">
+
+	<!-- Clam AV -->
+	<message key="plugins.generic.clamav.displayName">Clam Antivirus</message>
+	<message key="plugins.generic.clamav.description"><![CDATA[Integrate OJS with ClamAV for uploaded submission files.  Through this plugin, OJS can scan each submission file at the time of upload, and will reject files which have virus signatures known to ClamAV.]]></message>
+	<message key="plugins.generic.clamav.uploadBlocked">Clam Antivirus blocked the uploaded file due to the virus signature "{$virusFound}".</message>
+	
+	<!-- Clam AV Settings Management -->
+	<message key="plugins.generic.clamav.manager.clamavSettings">ClamAV Settings</message>
+	<message key="plugins.generic.clamav.manager.settings.description"><![CDATA[<p>Please provide detail on how to execute Clam AV on your system.  You must already have <a href="https://www.clamav.net/">Clam AV</a> installed.</p>]]></message>
+	<message key="plugins.generic.clamav.manager.settings.clamavPath">The system path to Clam AV's clamscan executable.</message>
+	<message key="plugins.generic.clamav.manager.settings.clamavPathRequired">The system path to Clam AV's clamscan executable is required.</message>
+	<message key="plugins.generic.clamav.manager.settings.test">Test</message>
+	<message key="plugins.generic.clamav.manager.settings.version">Version:</message>
+	<message key="plugins.generic.clamav.manager.settings.noversion">Clam AV version not found.</message>
+
+</locale>
