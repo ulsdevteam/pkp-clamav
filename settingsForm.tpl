@@ -22,7 +22,7 @@
 {include file="common/formErrors.tpl"}
 <table width="100%" class="data">
 	<tr valign="top" id="clamavPath">
-		<td width="20%" class="label">{fieldLabel name="clamavBlockTitle" key="plugins.generic.clamav.manager.settings.clamavPath" required="true"}</td>
+		<td width="20%" class="label">{fieldLabel name="clamavPath" key="plugins.generic.clamav.manager.settings.clamavPath" required="true"}</td>
 		<td width="80%" class="value"><input type="text" name="clamavPath" id="clamavPath" value="{$clamavPath|escape}" size="25" class="textField" /></td>
 	</tr>
 	<tr valign="top" id="clamavVersion">

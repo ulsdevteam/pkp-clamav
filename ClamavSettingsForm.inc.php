@@ -17,9 +17,6 @@ import('lib.pkp.classes.form.Form');
 
 class ClamavSettingsForm extends Form {
 
-	/** @var $journalId int */
-	var $journalId;
-
 	/** @var $plugin object */
 	var $plugin;
 
