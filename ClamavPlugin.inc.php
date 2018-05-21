@@ -28,15 +28,7 @@ class ClamavPlugin extends GenericPlugin {
 		if ($success && $this->getEnabled()) {
 
 			// Enable Clam AV's preprocessing of uploaded files
-			HookRegistry::register('SubmitHandler::saveSubmit', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('authorsubmitsuppfileform::validate', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('suppfileform::validate', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('SectionEditorAction::uploadLayoutVersion', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('SectionEditorAction::uploadReviewVersion', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('SectionEditorAction::uploadEditorVersion', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('SectionEditorAction::uploadCopyeditVersion', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('SectionEditorAction::uploadReviewForReviewer', array(&$this, 'clamscanUpload'));
-			HookRegistry::register('ReviewerAction::uploadReviewFile', array(&$this, 'clamscanUpload'));
+			HookRegistry::register('ArticleFileManager::handleUpload', array(&$this, 'clamscanHandleUpload'));
 		}
 		return $success;
 	}
@@ -213,54 +205,18 @@ class ClamavPlugin extends GenericPlugin {
 
 	/**
 	 * Hook callback: scan an uploaded file with ClamAV
-	 * @see SubmitHandler::saveSubmit()
-	 * @see Form::validate()
-	 * @see SectionEditorAction::uploadLayoutVersion()
-	 * @see SectionEditorAction::uploadReviewVersion()
-	 * @see SectionEditorAction::uploadEditorVersion()
-	 * @see SectionEditorAction::uploadCopyeditVersion()
+	 * @see ArticleFileManager::handleUpload()
 	 */
-	function clamscanUpload($hookName, $args) {
-		// Supported hooks must be enumerated here to identify the field which denotes the uploaded file and (optionally) the form being used
-		switch ($hookName) {
-			case 'authorsubmitsuppfileform::validate':
-			case 'suppfileform::validate':
-				$uploadedFileField = 'uploadSuppFile';
-				$form = $args[0];
-				break;
-			case 'SubmitHandler::saveSubmit':
-				$step = $args[0];
-				if ($step == 2) {
-					$uploadedFileField = 'submissionFile';
-				} else {
-					$uploadedFileField = 'uploadSuppFile';
-				}
-				$form = $args[2];
-				break;
-			case 'SectionEditorAction::uploadLayoutVersion':
-				$uploadedFileField = 'layoutFile';
-				$form = NULL;
-				break;
-			case 'SectionEditorAction::uploadReviewVersion':
-			case 'SectionEditorAction::uploadEditorVersion':
-			case 'SectionEditorAction::uploadCopyeditVersion':
-			case 'SectionEditorAction::uploadReviewForReviewer':
-			case 'ReviewerAction::uploadReviewFile':
-				$uploadedFileField = 'upload';
-				$form = NULL;
-				break;
-			default:
-				return false;
-		}
+	function clamscanHandleUpload($hookName, $args) {
+		$uploadedFileField = $args[0];
 		// If we have a valid clamscan and an uploaded file, scan the file
 		$result = true;
 		$message = $this->_clamscanFile($uploadedFileField);
 		if (!empty($message)) {
-			if (isset($form)) {
-				$form->addError($uploadedFileField, $message);
-			}
-			// Note that Author Submission, step 4 will not preseve this form error in the transition from the upload to the metadata
-			$result = false;
+			// set the pass-by-reference return value
+			$args[4] = false;
+			// returning true aborts processing
+			return true;
 		}
 		// returning false allows processing to continue
 		return false;
