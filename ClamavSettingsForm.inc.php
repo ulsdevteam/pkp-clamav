@@ -9,7 +9,7 @@
  * @class ClamavSettingsForm
  * @ingroup plugins_generic_clamav
  *
- * @brief Form for journal managers to modify Plum Analytics plugin settings
+ * @brief Form for the site admin to modify Clam AV plugin settings
  */
 
 
