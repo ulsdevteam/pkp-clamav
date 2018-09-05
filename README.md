@@ -12,7 +12,7 @@ This plugin scans submission files using [Clam Antivirus](https://www.clamav.net
 
 ## Installation
 
-Install this as a "generic" plugin in OJS.  To install manually via the filesystem, extract the contents of this archive to a directory (e.g. "clamscan") under "plugins/generic" in your OJS root.  To install via Git submodule, target that same directory path: `git submodule add https://github.com/ulsdevteam/pkp-clamav plugins/generic/clamav` and `git submodule update --init --recursive plugins/generic/clamav`.  Run the upgrade script to register this plugin, e.g.: `php tools/upgrade.php upgrade`
+Install this as a "generic" plugin in OJS.  To install manually via the filesystem, extract the contents of this archive to a "clamav" directory under "plugins/generic" in your OJS root.  To install via Git submodule, target that same directory path: `git submodule add https://github.com/ulsdevteam/pkp-clamav plugins/generic/clamav` and `git submodule update --init --recursive plugins/generic/clamav`.  Run the upgrade script to register this plugin, e.g.: `php tools/upgrade.php upgrade`.
 
 ## Configuration
 
