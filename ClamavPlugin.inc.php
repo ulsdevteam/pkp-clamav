@@ -15,7 +15,7 @@
 import('lib.pkp.classes.plugins.GenericPlugin');
 
 class ClamavPlugin extends GenericPlugin {
-
+    
 	/**
 	 * Called as a plugin is registered to the registry
 	 * @param $category String Name of category plugin was registered to
@@ -28,17 +28,11 @@ class ClamavPlugin extends GenericPlugin {
 		if ($success && $this->getEnabled()) {
 
 			// Enable Clam AV's preprocessing of uploaded files
-			HookRegistry::register('ArticleFileManager::handleUpload', array(&$this, 'clamscanHandleUpload'));
+//			HookRegistry::register('ArticleFileManager::handleUpload', array(&$this, 'clamscanHandleUpload'));
+			HookRegistry::register('submissionfilesuploadform::validate', array($this, 'clamscanHandleUpload'));
+
 		}
 		return $success;
-	}
-
-	/**
-	* @see PKPPlugin::isSitePlugin()
-	*/
-	function isSitePlugin() {
-		// This is a site-wide plugin.
-		return true;
 	}
 
 	/**
@@ -58,106 +52,63 @@ class ClamavPlugin extends GenericPlugin {
 	}
 
 	/**
-	 * Set the page's breadcrumbs, given the plugin's tree of items
-	 * to append.
-	 * @param $isSubclass boolean
+	 * @copydoc Plugin::getActions()
 	 */
-	function setBreadcrumbs($isSubclass = false) {
-		$templateMgr =& TemplateManager::getManager();
-		$pageCrumbs = array(
-			array(
-				Request::url(null, 'user'),
-				'navigation.user'
-			),
-			array(
-				Request::url(null, 'manager'),
-				'user.role.manager'
-			)
+	function getActions($request, $verb) {
+		$router = $request->getRouter();
+		import('lib.pkp.classes.linkAction.request.AjaxModal');
+		return array_merge(
+			$this->getEnabled()?array(
+				new LinkAction(
+					'settings',
+					new AjaxModal(
+						$router->url($request, null, null, 'manage', null, array('verb' => 'settings', 'plugin' => $this->getName(), 'category' => 'generic')),
+						$this->getDisplayName()
+					),
+					__('manager.plugins.settings'),
+					null
+				),
+			):array(),
+			parent::getActions($request, $verb)
 		);
-		if ($isSubclass) {
-			$pageCrumbs[] = array(
-				Request::url(null, 'manager', 'plugins'),
-				'manager.plugins'
-			);
-			$pageCrumbs[] = array(
-				Request::url(null, 'manager', 'plugins', 'generic'),
-				'plugins.categories.generic'
-			);
-		}
-
-		$templateMgr->assign('pageHierarchy', $pageCrumbs);
 	}
 
-
-	/**
-	 * Display verbs for the management interface.
-	 * @return array of verb => description pairs
+ 	/**
+	 * @copydoc Plugin::manage()
 	 */
-	function getManagementVerbs() {
-		$verbs = array();
-		if ($this->getEnabled()) {
-			$verbs[] = array('settings', __('manager.plugins.settings'));
-		}
-		return parent::getManagementVerbs($verbs);
-	}
-
-	/**
-	 * Execute a management verb on this plugin
-	 * @param $verb string
-	 * @param $args array
-	 * @param $message string Result status message
-	 * @param $messageParams array Parameters for the message key
-	 * @return boolean
-	 */
-	function manage($verb, $args, &$message, &$messageParams) {
-		if (!parent::manage($verb, $args, $message, $messageParams)) {
-			// If enabling this plugin, go directly to the settings
-			if ($verb == 'enable') {
-				$verb = 'settings';
-			} else {
-				return false;
-			}
-		}
-
-		switch ($verb) {
+	function manage($args, $request) {
+		switch ($request->getUserVar('verb')) {
 			case 'settings':
-				$templateMgr =& TemplateManager::getManager();
-				$templateMgr->register_function('plugin_url', array(&$this, 'smartyPluginUrl'));
-				$journal =& Request::getJournal();
+				$context = $request->getContext();
+
+				AppLocale::requireComponents(LOCALE_COMPONENT_APP_COMMON,  LOCALE_COMPONENT_PKP_MANAGER);
+				$templateMgr = TemplateManager::getManager($request);
+				$templateMgr->register_function('plugin_url', array($this, 'smartyPluginUrl'));
 
 				$this->import('ClamavSettingsForm');
-				$form = new ClamavSettingsForm($this, $journal->getId());
-				if (Request::getUserVar('save')) {
+				$form = new ClamavSettingsForm($this, $context->getId());
+
+				if ($request->getUserVar('save')) {
 					$form->readInputData();
 					if ($form->validate()) {
 						$form->execute();
-						$user =& Request::getUser();
-						import('classes.notification.NotificationManager');
-						$notificationManager = new NotificationManager();
-						$notificationManager->createTrivialNotification($user->getId());
-						Request::redirect(null, 'manager', 'plugins', 'generic');
-						return false;
-					} else {
-						$this->setBreadCrumbs(true);
-						$form->display();
+						return new JSONMessage(true);
 					}
 				} else {
-					if (Request::getUserVar('test')) {
-						$form->readInputData();
-					} else {
-						$form->initData();
-					}
-					$this->setBreadCrumbs(true);
-					$form->display();
+					$form->initData();
 				}
-				return true;
-			default:
-				// Unknown management verb
-				assert(false);
-				return false;
+				return new JSONMessage(true, $form->fetch($request));
 		}
+		return parent::manage($args, $request);
 	}
-	
+
+	/**
+	 * @copydoc PKPPlugin::getTemplatePath
+	 */
+	function getTemplatePath($inCore = false) {
+		return parent::getTemplatePath($inCore) . 'templates/';
+	}
+
 	/**
 	 * Get the clam version
 	 * @param $path string Optional path to check.  If not provided, the current setting value is used.
@@ -176,7 +127,7 @@ class ClamavPlugin extends GenericPlugin {
 		return '';
 	}
 
-	/**
+   	/**
 	 * Private helper method to scan a file, returning a virus message if matched
 	 * @param $uploadedFileField string The field index in $_FILES[] which references the uploaded file
 	 * @return string
@@ -192,7 +143,7 @@ class ClamavPlugin extends GenericPlugin {
 				unlink($uploadedFile);
 				unset($_FILES[$uploadedFileField]);
 				$scan = str_replace($uploadedFile.': ', '', $scan);
-				$user =& Request::getUser();
+				$user = Request::getUser();
 				import('classes.notification.NotificationManager');
 				$notificationManager = new NotificationManager();
 				$message = __('plugins.generic.clamav.uploadBlocked', array('virusFound' => $scan));
@@ -219,6 +170,32 @@ class ClamavPlugin extends GenericPlugin {
 			return true;
 		}
 		// returning false allows processing to continue
+		return false;
+	}
+    
+    /**
+	 * Check the uploaded file
+	 */
+	function checkUpload($hookName, $params) {	
+		$form = $params[0];
+		$request = Application::getRequest();
+		$context = $request->getContext();
+
+		$userVars = $request->getUserVars();
+		$fileName = $userVars['name'];
+		$extension = strtolower(array_pop(explode('.',$fileName)));
+
+		$allowedExtensions = $this->getSetting($context->getId(), 'allowedExtensions');
+
+		if ($allowedExtensions){
+
+			$allowedExtensionsArray = array_filter(array_map('trim', explode(';', $allowedExtensions )), 'strlen');
+
+			if (!in_array($extension, $allowedExtensionsArray)){
+				$form->addError('fileType', __('plugins.generic.allowedUploads.error', array('allowedExtensions' => $allowedExtensions)));
+			}
+
+		}
 		return false;
 	}
 

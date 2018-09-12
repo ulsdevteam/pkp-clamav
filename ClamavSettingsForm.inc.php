@@ -1,47 +1,52 @@
 <?php
 
 /**
- * @file plugins/generic/clamav/ClamavSettingsForm.inc.php
+ * @file plugins/generic/allowedUploads/AllowedUploadsSettingsForm.inc.php
  *
- * Copyright (c) 2018 University of Pittsburgh
- * Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class ClamavSettingsForm
- * @ingroup plugins_generic_clamav
+ * @class AllowedUploadsSettingsForm
+ * @ingroup plugins_generic_allowedUploads
  *
- * @brief Form for the site admin to modify Clam AV plugin settings
+ * @brief Form for managers to modify Allowed Uploads plugin settings
  */
-
 
 import('lib.pkp.classes.form.Form');
 
 class ClamavSettingsForm extends Form {
 
-	/** @var $plugin object */
-	var $plugin;
+	/** @var int */
+	var $_contextId;
+
+	/** @var object */
+	var $_plugin;
 
 	/**
 	 * Constructor
-	 * @param $plugin object
+	 * @param $plugin AllowedUploadsPlugin
+	 * @param $contextId int
 	 */
-	function ClamavSettingsForm(&$plugin) {
-		$this->plugin =& $plugin;
-		
-		parent::Form($plugin->getTemplatePath() . 'settingsForm.tpl');
+	function __construct($plugin, $contextId) {
+		$this->_contextId = $contextId;
+		$this->_plugin = $plugin;
 
-		$this->addCheck(new FormValidator($this, 'clamavPath', 'required', 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
+		parent::__construct($plugin->getTemplatePath() . 'settingsForm.tpl');
+
+        $this->addCheck(new FormValidator($this, 'clamavPath', 'required', 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
 		$this->addCheck(new FormValidatorPost($this));
+		$this->addCheck(new FormValidatorCSRF($this));
 	}
 
 	/**
 	 * Initialize form data.
 	 */
 	function initData() {
-		$plugin =& $this->plugin;
-
-		$this->_data = array();
-		$this->_data['clamavPath'] = $plugin->getSetting(CONTEXT_SITE, 'clamavPath');
-		$this->_data['clamversion'] = $this->displayVersion($this->_data['clamavPath']);
+		$plugin = $this->_plugin;
+        
+        $this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
+		$this->setData('clamversion', $this->displayVersion($this->getData('clamavPath')));
 	}
 
 	/**
@@ -49,15 +54,23 @@ class ClamavSettingsForm extends Form {
 	 */
 	function readInputData() {
 		$this->readUserVars(array('clamavPath'));
-		$this->_data['clamversion'] = $this->displayVersion($this->_data['clamavPath']);
+	}
+
+	/**
+	 * Fetch the form.
+	 * @copydoc Form::fetch()
+	 */
+	function fetch($request) {
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign('pluginName', $this->_plugin->getName());
+		return parent::fetch($request);
 	}
 
 	/**
 	 * Save settings.
 	 */
 	function execute() {
-		$plugin =& $this->plugin;
-		$plugin->updateSetting(CONTEXT_SITE, 'clamavPath', $this->getData('clamavPath'), 'string');
+		$this->_plugin->updateSetting($this->_contextId, 'clamavPath', $this->getData('clamavPath'), 'string');
 	}
 
 	/**
@@ -65,15 +78,15 @@ class ClamavSettingsForm extends Form {
 	 * @param $path string
 	 * @return string
 	 */
-	function displayVersion($path) {
-		$plugin =& $this->plugin;
+    function displayVersion($path) {
+		$plugin = $this->_plugin;
 		$version = $plugin->getClamVersion($path);
 		if ($version === '') {
 			$version = __('plugins.generic.clamav.manager.settings.noversion');
 		}
 		return $version;
 	}
-	
+
 }
 
 ?>
