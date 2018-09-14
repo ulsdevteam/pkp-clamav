@@ -46,7 +46,7 @@ class ClamavSettingsForm extends Form {
 		$plugin = $this->_plugin;
         
         $this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
-		$this->setData('clamversion', $this->displayVersion($this->getData('clamavPath')));
+		$this->setData('clamavVersion', $this->displayVersion($this->getData('clamavPath')));
 	}
 
 	/**
@@ -54,6 +54,7 @@ class ClamavSettingsForm extends Form {
 	 */
 	function readInputData() {
 		$this->readUserVars(array('clamavPath'));
+        $this->_data['clamavVersion'] = $this->displayVersion($this->_data['clamavPath']);
 	}
 
 	/**
@@ -70,7 +71,7 @@ class ClamavSettingsForm extends Form {
 	 * Save settings.
 	 */
 	function execute() {
-		$this->_plugin->updateSetting($this->_contextId, 'clamavPath', $this->getData('clamavPath'), 'string');
+		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavPath', $this->getData('clamavPath'), 'string');
 	}
 
 	/**

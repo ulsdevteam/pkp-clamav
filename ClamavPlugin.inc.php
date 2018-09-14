@@ -28,7 +28,6 @@ class ClamavPlugin extends GenericPlugin {
 		if ($success && $this->getEnabled()) {
 
 			// Enable Clam AV's preprocessing of uploaded files
-//			HookRegistry::register('ArticleFileManager::handleUpload', array(&$this, 'clamscanHandleUpload'));
 			HookRegistry::register('submissionfilesuploadform::validate', array($this, 'clamscanHandleUpload'));
 
 		}
@@ -88,16 +87,21 @@ class ClamavPlugin extends GenericPlugin {
 				$this->import('ClamavSettingsForm');
 				$form = new ClamavSettingsForm($this, $context->getId());
 
-				if ($request->getUserVar('save')) {
+				if (Request::getUserVar('test')) {
+					$form->readInputData();
+				} else if ($request->getUserVar('save')) {
 					$form->readInputData();
 					if ($form->validate()) {
 						$form->execute();
 						return new JSONMessage(true);
 					}
-				} else {
+                } else {
 					$form->initData();
 				}
 				return new JSONMessage(true, $form->fetch($request));
+            default:
+                assert(false);
+                return false;
 		}
 		return parent::manage($args, $request);
 	}
@@ -133,6 +137,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @return string
 	 */
 	function _clamscanFile($uploadedFileField) {
+        $temp = isset($_FILES[$uploadedFileField]['tmp_name']) == true;
 		if ($this->getClamVersion() && !empty($uploadedFileField)  && isset($_FILES[$uploadedFileField]['tmp_name'])) {
 			$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
 			$output = NULL;
@@ -156,9 +161,11 @@ class ClamavPlugin extends GenericPlugin {
 
 	/**
 	 * Hook callback: scan an uploaded file with ClamAV
-	 * @see ArticleFileManager::handleUpload()
+	 * @see submissionfilesuploadform::validate()
 	 */
 	function clamscanHandleUpload($hookName, $args) {
+        $temp1 = $args[0];
+        $temp2 = $args[1];
 		$uploadedFileField = $args[0];
 		// If we have a valid clamscan and an uploaded file, scan the file
 		$result = true;
@@ -170,32 +177,6 @@ class ClamavPlugin extends GenericPlugin {
 			return true;
 		}
 		// returning false allows processing to continue
-		return false;
-	}
-    
-    /**
-	 * Check the uploaded file
-	 */
-	function checkUpload($hookName, $params) {	
-		$form = $params[0];
-		$request = Application::getRequest();
-		$context = $request->getContext();
-
-		$userVars = $request->getUserVars();
-		$fileName = $userVars['name'];
-		$extension = strtolower(array_pop(explode('.',$fileName)));
-
-		$allowedExtensions = $this->getSetting($context->getId(), 'allowedExtensions');
-
-		if ($allowedExtensions){
-
-			$allowedExtensionsArray = array_filter(array_map('trim', explode(';', $allowedExtensions )), 'strlen');
-
-			if (!in_array($extension, $allowedExtensionsArray)){
-				$form->addError('fileType', __('plugins.generic.allowedUploads.error', array('allowedExtensions' => $allowedExtensions)));
-			}
-
-		}
 		return false;
 	}
 

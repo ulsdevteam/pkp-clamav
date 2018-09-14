@@ -1,11 +1,10 @@
 {**
- * plugins/generic/allowedUploads/settingsForm.tpl
+ * plugins/generic/clamav/settingsForm.tpl
  *
- * Copyright (c) 2014-2018 Simon Fraser University
- * Copyright (c) 2003-2018 John Willinsky
- * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
+ * Copyright (c) 2018 University of Pittsburgh
+ * Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
  *
- * Allowed Uploads plugin settings
+ * ClamAV plugin settings
  *
  *}
 <script>
@@ -22,10 +21,16 @@
 	<div id="description">{translate key="plugins.generic.clamav.manager.settings.description"}</div>
 
 	{fbvFormArea id="clamavSettingsFormArea"}
-		{fbvElement type="text" id="clamavPath" name="clamavPath" value="$clamav" label="plugins.generic.clamav.manager.settings.clamavPath"}
+		{fbvElement type="text" id="clamavPath" name="clamavPath" value="$clamavPath" label="plugins.generic.clamav.manager.settings.clamavPath"}
 	{/fbvFormArea}
+    
+    <div id=clamVersion">
+        <label for="clamavVersion">{translate key="plugins.generic.clamav.manager.settings.version"}</label>
+        <input disabled="disabled" type="text" id="clamavVersion" value="{$clamavVersion}" />
+        <input type="submit" name="test" value="{translate key="plugins.generic.clamav.manager.settings.test"}" />
+    </div>
 
 	{fbvFormButtons}
 
-	<p><span class="formRequired">{translate key="common.requiredField"}</span></p>
+    
 </form>
