@@ -137,8 +137,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @return string
 	 */
 	function _clamscanFile($uploadedFileField) {
-        $temp = isset($_FILES[$uploadedFileField]['tmp_name']) == true;
-		if ($this->getClamVersion() && !empty($uploadedFileField)  && isset($_FILES[$uploadedFileField]['tmp_name'])) {
+		if ($this->getClamVersion() && !empty($uploadedFileField) && isset($_FILES[$uploadedFileField]['tmp_name'])) {
 			$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
 			$output = NULL;
 			$exitCode = NULL;
@@ -164,20 +163,16 @@ class ClamavPlugin extends GenericPlugin {
 	 * @see submissionfilesuploadform::validate()
 	 */
 	function clamscanHandleUpload($hookName, $args) {
-        $temp1 = $args[0];
-        $temp2 = $args[1];
-		$uploadedFileField = $args[0];
-		// If we have a valid clamscan and an uploaded file, scan the file
-		$result = true;
-		$message = $this->_clamscanFile($uploadedFileField);
-		if (!empty($message)) {
-			// set the pass-by-reference return value
-			$args[4] = false;
-			// returning true aborts processing
-			return true;
-		}
-		// returning false allows processing to continue
-		return false;
+        // $args was once used to identify the array key of the file being scanned.
+        if(null !== key($_FILES)) {
+            $message = $this->_clamscanFile(key($_FILES));
+            if(!empty($message)) {
+                // returning true aborts processing
+                return true;
+            }
+        }
+        // returning false allows processing to continue
+        return false;
 	}
 
 }
