@@ -15,7 +15,7 @@
 	<!-- Clam AV -->
 	<message key="plugins.generic.clamav.displayName">Clam Antivirus</message>
 	<message key="plugins.generic.clamav.description"><![CDATA[Integrate OJS with ClamAV for uploaded submission files.  Through this plugin, OJS can scan each submission file at the time of upload, and will reject files which have virus signatures known to ClamAV.]]></message>
-	<message key="plugins.generic.clamav.uploadBlocked">Clam Antivirus blocked the uploaded file due to the virus signature "{$virusFound}".</message>
+	<message key="plugins.generic.clamav.uploadBlocked">Clam Antivirus blocked the uploaded file due to the virus signature "{$virusFound}" in file "{$fileName}".</message>
 	
 	<!-- Clam AV Settings Management -->
 	<message key="plugins.generic.clamav.manager.clamavSettings">ClamAV Settings</message>
@@ -23,7 +23,13 @@
 	<message key="plugins.generic.clamav.manager.settings.clamavPath">The system path to Clam AV's clamscan executable.</message>
 	<message key="plugins.generic.clamav.manager.settings.clamavPathRequired">The system path to Clam AV's clamscan executable is required.</message>
 	<message key="plugins.generic.clamav.manager.settings.test">Test</message>
-	<message key="plugins.generic.clamav.manager.settings.version">Version:</message>
+	<message key="plugins.generic.clamav.manager.settings.version">ClamAV Version Detected</message>
 	<message key="plugins.generic.clamav.manager.settings.noversion">Clam AV version not found.</message>
+    
+    <!-- Clam AV Socket Setting Management -->
+    <message key="plugins.generic.clamav.manager.settings.daemon">ClamAV Daemon</message>
+    <message key="plugins.generic.clamav.manager.settings.daemon.description"><![CDATA[If the clamd daemon is available on your system, you can use it to scan uploaded files instead of the clamscan executable. Unlike clamscan, the clamd daemon keeps its virus definitions in memory between scans, reducing latency.]]></message>
+    <message key="plugins.generic.clamav.manager.settings.clamavUseSocket">Connect to the ClamAV Daemon instead?</message>
+    <message key="plugins.generic.clamav.manager.settings.clamavSocketPath">The system path to Clam AV's clamd.sock socket.</message>
 
 </locale>
