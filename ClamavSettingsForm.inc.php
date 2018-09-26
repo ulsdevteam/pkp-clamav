@@ -1,18 +1,16 @@
 <?php
 
 /**
- * @file plugins/generic/allowedUploads/AllowedUploadsSettingsForm.inc.php
+ * @file plugins/generic/clamav/ClamavSettingsForm.inc.php
  *
- * Copyright (c) 2014-2018 Simon Fraser University
- * Copyright (c) 2003-2018 John Willinsky
- * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
+ * Copyright (c) 2018 University of Pittsburgh
+ * Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
  *
- * @class AllowedUploadsSettingsForm
- * @ingroup plugins_generic_allowedUploads
+ * @class ClamavSettingsForm
+ * @ingroup plugins_generic_clamav
  *
- * @brief Form for managers to modify Allowed Uploads plugin settings
+ * @brief Form for the site admin to modify Clam AV plugin settings
  */
-
 import('lib.pkp.classes.form.Form');
 
 class ClamavSettingsForm extends Form {
@@ -25,7 +23,7 @@ class ClamavSettingsForm extends Form {
 
 	/**
 	 * Constructor
-	 * @param $plugin AllowedUploadsPlugin
+	 * @param $plugin ClamavSettingsForm
 	 * @param $contextId int
 	 */
 	function __construct($plugin, $contextId) {
@@ -34,7 +32,7 @@ class ClamavSettingsForm extends Form {
 
 		parent::__construct($plugin->getTemplatePath() . 'settingsForm.tpl');
 
-        $this->addCheck(new FormValidator($this, 'clamavPath', 'optional', 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
+		$this->addCheck(new FormValidator($this, 'clamavPath', FORM_VALIDATOR_OPTIONAL_VALUE, 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
 		$this->addCheck(new FormValidatorPost($this));
 		$this->addCheck(new FormValidatorCSRF($this));
 	}
@@ -44,11 +42,11 @@ class ClamavSettingsForm extends Form {
 	 */
 	function initData() {
 		$plugin = $this->_plugin;
-        
-        $this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
+
+		$this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
 		$this->setData('clamavVersion', $this->displayVersion($this->getData('clamavPath')));
-        $this->setData('clamavUseSocket', $plugin->getSetting(CONTEXT_SITE, 'clamavUseSocket'));
-        $this->setData('clamavSocketPath', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketPath'));
+		$this->setData('clamavUseSocket', $plugin->getSetting(CONTEXT_SITE, 'clamavUseSocket'));
+		$this->setData('clamavSocketPath', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketPath'));
 	}
 
 	/**
@@ -56,7 +54,7 @@ class ClamavSettingsForm extends Form {
 	 */
 	function readInputData() {
 		$this->readUserVars(array('clamavPath', 'clamavUseSocket', 'clamavSocketPath'));
-        $this->setData('clamavVersion', $this->displayVersion($this->_data['clamavPath']));
+		$this->setData('clamavVersion', $this->displayVersion($this->_data['clamavPath']));
 	}
 
 	/**
@@ -83,7 +81,7 @@ class ClamavSettingsForm extends Form {
 	 * @param $path string
 	 * @return string
 	 */
-    function displayVersion($path) {
+	function displayVersion($path) {
 		$plugin = $this->_plugin;
 		$version = $plugin->getClamVersion($path);
 		if ($version === '') {

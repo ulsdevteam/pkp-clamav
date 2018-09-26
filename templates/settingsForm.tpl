@@ -1,14 +1,14 @@
 {**
- * plugins/generic/clamav/settingsForm.tpl
- *
- * Copyright (c) 2018 University of Pittsburgh
- * Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
- *
- * ClamAV plugin settings
- *
- *}
+* plugins/generic/clamav/settingsForm.tpl
+*
+* Copyright (c) 2018 University of Pittsburgh
+* Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
+*
+* ClamAV plugin settings
+*
+*}
 <script>
-	$(function() {ldelim}
+	$(function () {ldelim}
 		// Attach the form handler.
 		$('#clamavSettingsForm').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
 	{rdelim});
@@ -21,22 +21,22 @@
 	<div id="description">{translate key="plugins.generic.clamav.manager.settings.description"}</div>
 
 	{fbvFormArea id="clamscanSettingsFormArea" description="plugins.generic.clamav.manager.settings.description"}
-        {fbvElement type="text" id="clamavPath" name="clamavPath" value="$clamavPath" label="plugins.generic.clamav.manager.settings.clamavPath"}
-        <div id=clamVersion">
-            <label for="clamavVersion">{translate key="plugins.generic.clamav.manager.settings.version"}</label>
-            <input disabled="disabled" type="text" id="clamavVersion" value="{$clamavVersion}" />
-            <input type="submit" name="test" value="{translate key="plugins.generic.clamav.manager.settings.test"}" />
-        </div>
+	{fbvElement type="text" id="clamavPath" name="clamavPath" value="$clamavPath" label="plugins.generic.clamav.manager.settings.clamavPath"}
+	<div id="clamVersion">
+		<label for="clamavVersion">{translate key="plugins.generic.clamav.manager.settings.version"}</label>
+		<input disabled="disabled" type="text" id="clamavVersion" value="{$clamavVersion}" />
+		<input type="submit" name="test" value="{translate key="plugins.generic.clamav.manager.settings.test"}" />
+	</div>
 	{/fbvFormArea}
-        
+
 	{fbvFormArea id="clamdSettingsFormArea" title="plugins.generic.clamav.manager.settings.daemon"}
-        {fbvFormSection description="plugins.generic.clamav.manager.settings.daemon.description" list=true}
-            {fbvElement type="checkbox" id="clamavUseSocket" name="clamavUseSocket" value="1" checked="$clamavUseSocket" label="plugins.generic.clamav.manager.settings.clamavUseSocket"}
-            {fbvElement type="text" id="clamavSocketPath" name="clamavSocketPath" value="$clamavSocketPath" label="plugins.generic.clamav.manager.settings.clamavSocketPath"}
-		{/fbvFormSection}
+	{fbvFormSection description="plugins.generic.clamav.manager.settings.daemon.description" list=true}
+	{fbvElement type="checkbox" id="clamavUseSocket" name="clamavUseSocket" value="1" checked="$clamavUseSocket" label="plugins.generic.clamav.manager.settings.clamavUseSocket"}
+	{fbvElement type="text" id="clamavSocketPath" name="clamavSocketPath" value="$clamavSocketPath" label="plugins.generic.clamav.manager.settings.clamavSocketPath"}
+	{/fbvFormSection}
 	{/fbvFormArea}
 
 	{fbvFormButtons}
 
-    
+
 </form>
