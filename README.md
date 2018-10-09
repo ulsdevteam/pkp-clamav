@@ -21,6 +21,8 @@ Install this as a "generic" plugin in OJS.  To install manually via the filesyst
 
 You must be the site administrator in order to enable or configure this plugin.  Enable this module and provide a path to the `clamscan` executable in the Settings.  A full path name is required. If, instead, you wish to use the clamd daemon, you must have the clam daemon installed and available to Apache. As with clamscan, a full path to the clamd.sock socket is required.
 
+Most users will probably want to use a unix socket connection; in this case, prepend "unix://" to the path. (For example, "unix:///var/run/clamav/clamd.sock") This plugin has not been extensively tested with other socket connections.
+
 ## Usage
 
 When uploading a submission file through the Author Submission Steps, or via the Editorial interface, or via the Review process, the submission file will be scanned.  If a virus is detected, the upload will be canceled and warning notification will be displayed.
