@@ -4,7 +4,7 @@ This plugin scans submission files using [Clam Antivirus](https://www.clamav.net
 
 ## Requirements
 
-* OJS 2.4.x
+* OJS 3.1.x
 * PHP 5.3 or later
 * Clam Antivirus
   * To run clamscan
