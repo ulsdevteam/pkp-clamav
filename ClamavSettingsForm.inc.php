@@ -40,13 +40,19 @@ class ClamavSettingsForm extends Form {
 	/**
 	 * Initialize form data.
 	 */
-	function initData() {
+	function initData($request) {
 		$plugin = $this->_plugin;
+		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
 
 		$this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
 		$this->setData('clamavVersion', $this->displayVersion($this->getData('clamavPath')));
+		$this->setData('clamdVersion', $this->displayVersion($this->getData('clamavSocketPath')));
 		$this->setData('clamavUseSocket', $plugin->getSetting(CONTEXT_SITE, 'clamavUseSocket'));
 		$this->setData('clamavSocketPath', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketPath'));
+		$this->setData('pluginJavascriptURL', $basePluginUrl . 'js' . DIRECTORY_SEPARATOR);
+		$this->setData('pluginStylesheetURL', $basePluginUrl . 'css' . DIRECTORY_SEPARATOR);
+		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
+		$this->setData('baseUrl', $request->getBaseUrl());
 	}
 
 	/**

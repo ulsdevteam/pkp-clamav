@@ -1,0 +1,64 @@
+/**
+ * @file plugins/generic/clamav/css/clamav.css
+ *
+ * Copyright (c) 2018 University of Pittsburgh
+ * Distributed under the GNU GPL v2 or later. For full terms see the LICENSE file.
+ *
+ * @brief CSS to support the Clam AV plugin's settings page.
+ */
+
+#clamavSettingsForm dl, #clamavSettingsForm dt, #clamavSettingsForm dd {
+	padding: 0;
+	margin: 0;
+}
+
+#clamavSettingsForm dt, #clamavSettingsForm dd {
+	display: inline;
+}
+
+#clamavSettingsForm dt {
+	font-weight: 900;
+}
+
+#clamavSettingsForm .field.text {
+	padding-left: 3em;
+}
+
+#clamscanSettingsFormArea #clamavExecutableArea, #clamdSettingsFormArea #clamdSocketArea {
+	/* 
+	 * sets this as a containing block, against which other absolutely-
+	 * positioned elements will be offset--namely the pseudo-elements
+	 */
+	position: relative;
+}
+
+#clamscanSettingsFormArea #clamavExecutableArea::before, #clamdSettingsFormArea #clamdSocketArea::before {
+	position: absolute; /* position will be relative to containing block */
+	top: .2em;
+	left: .5em;
+	text-align: center;
+	padding: 0;
+	padding-top: 0.1em;
+	margin: 0;
+	width: 1.9em;
+	height: 1.9em;
+	font-size: 1em;
+	border-radius: .95em;
+	color: white;
+}
+
+#clamscanSettingsFormArea #clamavExecutableArea.valid::before, #clamdSettingsFormArea #clamdSocketArea.valid::before {
+	background-color: green;
+	content: "\2713"; /* checkbox. Remember that CSS uses different entities than HTML. */
+}
+
+#clamscanSettingsFormArea #clamavExecutableArea.invalid::before, #clamdSettingsFormArea #clamdSocketArea.invalid::before {
+	background-color: red;
+	content: "X";
+	font-size: 1.05em;
+}
+
+#clamscanSettingsFormArea #clamavExecutableArea.loading::before, #clamdSettingsFormArea #clamdSocketArea.loading::before {
+	background: none;
+	content: "";
+}
