@@ -28,18 +28,13 @@ class ClamavVersionHandler extends Handler {
 	 * @return null|JSONMessage
 	 */
 	public function get($args, $request) {
-/*
- *		Insert user authentication step here
- * 
- * 		if (!$this->article) {
- *			return new JSONMessage(false);
- *		}
-*/
-		$plugin = PluginRegistry::getPlugin('generic', 'clamavplugin');
-		$userVars = $request->getUserVars();
-		$path = $userVars['path'];
-		$type = $userVars['type'];
-		$clamVersion = $plugin->getClamVersion($path, $type);
-		return new JSONMessage(true, $clamVersion);
+		if(Validation::isSiteAdmin()) {
+			$plugin = PluginRegistry::getPlugin('generic', 'clamavplugin');
+			$userVars = $request->getUserVars();
+			$path = $userVars['path'];
+			$type = $userVars['type'];
+			$clamVersion = $plugin->getClamVersion($path, $type);
+			return new JSONMessage(true, $clamVersion);
+		}
 	}
 }
