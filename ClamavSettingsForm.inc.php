@@ -20,7 +20,7 @@ class ClamavSettingsForm extends Form {
 
 	/** @var object */
 	var $_plugin;
-
+	
 	/**
 	 * Constructor
 	 * @param $plugin ClamavSettingsForm
@@ -70,6 +70,7 @@ class ClamavSettingsForm extends Form {
 	function fetch($request) {
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('pluginName', $this->_plugin->getName());
+
 		return parent::fetch($request);
 	}
 
