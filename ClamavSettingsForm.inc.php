@@ -60,7 +60,6 @@ class ClamavSettingsForm extends Form {
 	 */
 	function readInputData() {
 		$this->readUserVars(array('clamavPath', 'clamavUseSocket', 'clamavSocketPath'));
-		$this->setData('clamavVersion', $this->displayVersion($this->_data['clamavPath']));
 	}
 
 	/**
