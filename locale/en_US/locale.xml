@@ -16,6 +16,7 @@
 	<message key="plugins.generic.clamav.displayName">Clam Antivirus</message>
 	<message key="plugins.generic.clamav.description"><![CDATA[Integrate OJS with ClamAV for uploaded submission files.  Through this plugin, OJS can scan each submission file at the time of upload, and will reject files which have virus signatures known to ClamAV.]]></message>
 	<message key="plugins.generic.clamav.uploadBlocked">Clam Antivirus blocked the uploaded file due to the virus signature "{$virusFound}" in file "{$fileName}".</message>
+	<message key="plugins.generic.clamav.timeout">Clam Antivirus was unable to complete its scan of the file "{$fileName}".</message>
 	
 	<!-- Clam AV Settings Management -->
 	<message key="plugins.generic.clamav.manager.clamavSettings">Clam AV Settings</message>
@@ -34,5 +35,17 @@
 	<message key="plugins.generic.clamav.manager.settings.clamavUseSocket">Connect to the Clam AV daemon instead?</message>
 	<message key="plugins.generic.clamav.manager.settings.clamavSocketPath">The system path to Clam AV's clamd.sock socket.</message>
 	<message key="plugins.generic.clamav.manager.settings.clamSocketVersion">Clam AV version:</message>
+	
+	<!-- Advanced -->
+	<message key="plugins.generic.clamav.manager.settings.advanced">Advanced</message>
+	<message key="plugins.generic.clamav.manager.settings.clamavSocketTimeout">Timeout in seconds.</message>
+	<message key="plugins.generic.clamav.manager.settings.clamavSocketTimeout.units">seconds</message>
+
+	<message key="plugins.generic.clamav.manager.settings.allowUnscannedFiles">Allow or block unscanned files?</message>
+
+	<message key="plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow">Allow Unscanned Files</message>
+	<message key="plugins.generic.clamav.manager.settings.allowUnscannedFiles.block">Block Unscanned Files</message>
+	
+	<message key="plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"><![CDATA[The advanced settings only apply to scans using the clam AV daemon. If a scan of a file takes longer than the timeout setting, the scan will not complete. How the plugin treats these "unscanned files" is determined by the second setting. Allowing these unscanned files means that files that cannot be scanned in time will be successfully uploaded; blocking unscanned files means that files that cannot be scanned will be blocked and cannot be uploaded. Blocking files when they cannot be scanned is safer, but may cause problems for legitimate users.]]></message>
 
 </locale>

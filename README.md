@@ -23,6 +23,8 @@ You must be the site administrator in order to enable or configure this plugin. 
 
 Most users will probably want to use a unix socket connection; in this case, prepend "unix://" to the path. (For example, "unix:///var/run/clamav/clamd.sock") This plugin has not been extensively tested with other socket connections.
 
+Socket connections will operate on a timeout; files that are not scanned in the alloted time will be either allowed through or blocked, depending on the plugin configuration. These options (both listed under the "Advanced" heading) only affect the socket connection for the Clam AV daemon.
+
 ## Usage
 
 When uploading a submission file through the Author Submission Steps, or via the Editorial interface, or via the Review process, the submission file will be scanned.  If a virus is detected, the upload will be canceled and warning notification will be displayed.

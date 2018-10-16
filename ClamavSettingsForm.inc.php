@@ -14,6 +14,10 @@
 import('lib.pkp.classes.form.Form');
 
 class ClamavSettingsForm extends Form {
+	const TIMEOUT_DEFAULT = 30;
+	const UNSCANNED_DEFAULT = 'allow';
+	const UNSCANNED_ALLOW = 'allow';
+	const UNSCANNED_BLOCK = 'block';
 
 	/** @var int */
 	var $_contextId;
@@ -43,14 +47,21 @@ class ClamavSettingsForm extends Form {
 	function initData($request) {
 		$plugin = $this->_plugin;
 		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
+		$baseIndexUrl = $request->getIndexUrl();
 
 		$this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
 		$this->setData('clamavUseSocket', $plugin->getSetting(CONTEXT_SITE, 'clamavUseSocket'));
 		$this->setData('clamavSocketPath', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketPath'));
+		$this->setData('unscannedFileOption', $plugin->getSetting(CONTEXT_SITE, 'allowUnscannedFiles'));
+		$this->setData('clamavSocketTimeout', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketTimeout'));
+
 
 		$this->setData('pluginJavascriptURL', $basePluginUrl . 'js' . DIRECTORY_SEPARATOR);
 		$this->setData('pluginStylesheetURL', $basePluginUrl . 'css' . DIRECTORY_SEPARATOR);
 		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
+		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
+		$this->setData('pluginAjaxUrl', $baseIndexUrl . DIRECTORY_SEPARATOR . 'clamav' . DIRECTORY_SEPARATOR . 'clamavVersion');
+
 		$this->setData('baseUrl', $request->getBaseUrl());
 	}
 
@@ -58,7 +69,7 @@ class ClamavSettingsForm extends Form {
 	 * Assign form data to user-submitted data.
 	 */
 	function readInputData() {
-		$this->readUserVars(array('clamavPath', 'clamavUseSocket', 'clamavSocketPath'));
+		$this->readUserVars(array('clamavPath', 'clamavUseSocket', 'clamavSocketPath', 'clamavSocketTimeout', 'allowUnscannedFiles',));
 	}
 
 	/**
@@ -69,6 +80,12 @@ class ClamavSettingsForm extends Form {
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('pluginName', $this->_plugin->getName());
 
+		$unscannedFileOptions = array(
+			'allow' => __('plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow'),
+			'block' => __('plugins.generic.clamav.manager.settings.allowUnscannedFiles.block')
+		);
+		$templateMgr->assign('unscannedFileOptions', $unscannedFileOptions);
+
 		return parent::fetch($request);
 	}
 
@@ -76,9 +93,22 @@ class ClamavSettingsForm extends Form {
 	 * Save settings.
 	 */
 	function execute() {
+		// set defaults if we have them. Not using built-in validation because
+		// these fields aren't mandatory.
+		$clamavSocketTimeout = $this->getData('clamavSocketTimeout');
+		if((int) $clamavSocketTimeout < 1) {
+			$clamavSocketTimeout = self::TIMEOUT_DEFAULT;
+		}
+		$allowUnscannedFiles = $this->getData('allowUnscannedFiles');
+		if((string) $allowUnscannedFiles !== self::UNSCANNED_ALLOW && (string) $allowUnscannedFiles !== self::UNSCANNED_BLOCK) {
+			$allowUnscannedFiles = self::UNSCANNED_DEFAULT;
+		}
+
 		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavPath', $this->getData('clamavPath'), 'string');
 		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavUseSocket', $this->getData('clamavUseSocket'), 'bool');
 		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavSocketPath', $this->getData('clamavSocketPath'), 'string');
+		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavSocketTimeout', $clamavSocketTimeout, 'int');
+		$this->_plugin->updateSetting(CONTEXT_SITE, 'allowUnscannedFiles', $allowUnscannedFiles, 'string');
 	}
 
 	/**

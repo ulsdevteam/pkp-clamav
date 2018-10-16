@@ -18,7 +18,7 @@
 		versionDisplayId: "clamExecutableVersion",
 		lastCheckedValue: "",
 		container: "clamavExecutableArea",
-	}
+	};
 	
 	clamDaemon = {
 		thisName: "clamDaemon",
@@ -27,7 +27,7 @@
 		versionDisplayId: "clamSocketVersion",
 		lastCheckedValue: "",
 		container: "clamdSocketArea",
-	}
+	};
 	
 	//	bind an event handler to the input event on each of our input elements
 	$("#"+clamScan['inputId']).on('input', function() {
@@ -54,7 +54,15 @@
 	 * 3. by appending it to the form element instead of the head element, it
 	 *		cleans up after itself when the modal is closed.
 	 */
-	$('<style>#clamscanSettingsFormArea #clamavExecutableArea.loading::before, #clamdSettingsFormArea #clamdSocketArea.loading::before { background-image: url(\"'+$("#clamavSettingsForm").data('loading-href')+'\"); }</style>').appendTo('#clamscanSettingsFormArea'); 
+	$(	'<style>\n' +
+			'#clamscanSettingsFormArea #clamavExecutableArea.loading::before,' +
+			' #clamdSettingsFormArea #clamdSocketArea.loading::before {\n' +
+				'background-image: url(\"'+$("#clamavSettingsForm").data('loading-href')+'\");\n' +
+			'}\n' +
+			'#clamdSocketAdvancedSettings > div.pkp_helpers_quarter.inline::after {\n' +
+				'content: "' + $("#clamavSettingsForm").data('timeout-units') + '";\n' +
+			'}\n' +
+		'</style>').appendTo('#clamavSettingsForm'); 
 
 	/*
 	 * We're using this to test and see if the field has been changed since the
@@ -85,7 +93,7 @@
 		}
 		
 		// This builds the request URL
-		var url = $("#clamavSettingsForm").data('json-href') + "/index.php/clamav/clamavVersion/get?path=" + encodeURIComponent(clamavPath) + "&type=" + clamAv['type'];
+		var url = $("#clamavSettingsForm").data('ajax-href') + "/get?path=" + encodeURIComponent(clamavPath) + "&type=" + clamAv['type'];
 		// Indicates to the user that we are starting to load data
 		$("#"+clamAv['container']).removeClass("valid invalid").addClass("loading");
 

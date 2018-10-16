@@ -20,7 +20,7 @@
 	font-weight: 900;
 }
 
-#clamavSettingsForm .field.text {
+#clamavSettingsForm .liveValidation {
 	padding-left: 3em;
 }
 
@@ -61,4 +61,32 @@
 #clamscanSettingsFormArea #clamavExecutableArea.loading::before, #clamdSettingsFormArea #clamdSocketArea.loading::before {
 	background: none;
 	content: "";
+}
+
+#clamdSocketAdvanced div.full_description {
+	
+}
+
+#clamdSocketAdvancedSettings > div.pkp_helpers_quarter.inline {
+	/* 
+	 * sets this as a containing block, against which other absolutely-
+	 * positioned elements will be offset--namely the pseudo-elements
+	 */
+	position: relative;
+}
+
+#clamdSocketAdvancedSettings > div.pkp_helpers_quarter.inline > input {
+	padding-left: 1em;
+}
+
+#clamdSocketAdvancedSettings > div.pkp_helpers_quarter.inline::after {
+	position: absolute; /* position will be relative to containing block */
+	top: .2em;
+	right: 3.5em;
+	padding: 0;
+	padding-top: 0.1em;
+	margin: 0;
+	font-size: 1em;
+	color: rgb(120,120,120);
+	content: "seconds"; /* default value will be overridden by translation with JS-generated CSS */
 }
