@@ -300,7 +300,7 @@ class ClamavPlugin extends GenericPlugin {
 			time_nanosleep(0, $delay);
 			$output = stream_get_contents($socket);
 			if ($output !== "") {
-				if($output == "1: stream: OK ") {
+				if($output == "1: stream: OK\0") {
 					return Array('safe' => true, 'message' => $output);
 				} else {
 					return Array('safe' => false, 'message' => substr($output, 11));
