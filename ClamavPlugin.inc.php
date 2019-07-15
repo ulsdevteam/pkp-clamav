@@ -16,6 +16,16 @@ import('lib.pkp.classes.plugins.GenericPlugin');
 class ClamavPlugin extends GenericPlugin {
 	const TYPE_SOCKET = 'socket';
 	const TYPE_EXECUTABLE = 'executable';
+
+	/**
+	 * @var $currentAppVersion Version
+	 * 
+	 * This string holds the current version object returned by the VersionDAO
+	 * object. It's built in $this->register() and is used throughout the plugin
+	 * to support backwards compatibility with older versions of OJS.
+	 */
+	public $currentAppVersion = null;
+
 	/**
 	 * Called as a plugin is registered to the registry
 	 * @param $category String Name of category plugin was registered to
@@ -23,6 +33,10 @@ class ClamavPlugin extends GenericPlugin {
 	 * 	the plugin will not be registered.
 	 */
 	function register($category, $path, $mainContextId = NULL) {
+		// Setting version information for backwards compatibility in other areas of the plugin
+		$versionDao = DAORegistry::getDAO('VersionDAO');
+		$this->currentAppVersion = $versionDao->getCurrentVersion();
+
 		$success = parent::register($category, $path, $mainContextId);
 		if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE'))
 			return true;
@@ -59,6 +73,24 @@ class ClamavPlugin extends GenericPlugin {
 	function isSitePlugin() {
 		return true;
 	}
+	
+	/**
+	 * Backwards-compatible method to retrieve the current context across
+	 * multiple versions of PKP applicatiosn
+	 * @return 
+	 */
+	function _getBackwardsCompatibleContext() {
+		$versionCompare = $this->currentAppVersion->compare("3.2");
+		if($versionCompare >= 0) {
+			// OJS 3.2 and later
+			$request = Application::get()->getRequest();
+			$context = $request->getContext();
+		} else {
+			// OJS 3.1.2 and earlier
+			$context = Request::getContext();
+		}
+		return $context;
+	}
 
 	/**
 	 * @copydoc Plugin::getActions()
@@ -83,7 +115,7 @@ class ClamavPlugin extends GenericPlugin {
 	function manage($args, $request) {
 		switch ($request->getUserVar('verb')) {
 			case 'settings':
-				$context = $request->getContext();
+				$contextID = (!is_null($this->_getBackwardsCompatibleContext()) ? $this->_getBackwardsCompatibleContext()->getId() : CONTEXT_SITE);
 
 				AppLocale::requireComponents(LOCALE_COMPONENT_APP_COMMON, LOCALE_COMPONENT_PKP_MANAGER);
 				$templateMgr = TemplateManager::getManager($request);
@@ -91,7 +123,7 @@ class ClamavPlugin extends GenericPlugin {
 				$templateMgr->register_function('plugin_url', array($this, 'smartyPluginUrl'));
 
 				$this->import('ClamavSettingsForm');
-				$form = new ClamavSettingsForm($this, $context->getId());
+				$form = new ClamavSettingsForm($this, $contextID);
 				
 				if ($request->getUserVar('save')) {
 					$form->readInputData();
@@ -115,7 +147,15 @@ class ClamavPlugin extends GenericPlugin {
 	 * @copydoc PKPPlugin::getTemplatePath
 	 */
 	function getTemplatePath($inCore = false) {
-		return parent::getTemplatePath($inCore) . 'templates/';
+		$versionCompare = $this->currentAppVersion->compare("3.1.2");
+
+		if($versionCompare >= 0) {
+			// OJS 3.1.2 and later
+			return parent::getTemplatePath($inCore);
+		} else {
+			// OJS 3.1.1 and earlier 3.x releases
+			return parent::getTemplatePath($inCore) . 'templates' . DIRECTORY_SEPARATOR;
+		}
 	}
 
 	/**
@@ -265,7 +305,9 @@ class ClamavPlugin extends GenericPlugin {
 		unlink($uploadedFile);
 		unset($_FILES[$uploadedFileField]);
 
-		$user = Request::getUser();
+		$request = Application::getRequest();
+		$user = $request->getUser();
+		
 		import('classes.notification.NotificationManager');
 		$notificationManager = new NotificationManager();
 
