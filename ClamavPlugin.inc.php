@@ -221,7 +221,7 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	function _clamDaemonFile($uploadedFileField) {
 		$clamavSocketPath = $this->getSetting(CONTEXT_SITE, 'clamavSocketPath');
-		$maxInstreamSize = 1024; // TODO: need to universalize this based on a plugin setting
+		$maxInstreamSize = 1048576; // TODO: need to universalize this based on a plugin setting
 		$output = "";
 		$errno = 0;
 		$errorMessage = "";
@@ -230,45 +230,18 @@ class ClamavPlugin extends GenericPlugin {
 		// connections nowadays
 		$clamDaemon = stream_socket_client("$clamavSocketPath", $errno, $errorMessage);
 		$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
+                $uploadedFileMods = shell_exec("stat -c '%a' $uploadedFile");
+                shell_exec("chmod 644 $uploadedFile");
 		// open file for reading in binary mode
 		$tmpFile = fopen($uploadedFile, 'rb');
 
 		if ($clamDaemon && $tmpFile) {
 			// clamd wants non-blocking socket connections
 			stream_set_blocking($clamDaemon, false);
-
-			// begin IDSESSION with clamd. z prefix indicates null delimiter.
-			// \0 is null character.
-			stream_socket_sendto($clamDaemon, "zIDSESSION\0");
-
-			/*
-			 * INSTREAM begins data stream for virus scanning. Data is sent
-			 * in chunks, with format <length><data> where <length> is the size
-			 * of the following data in bytes expressed as a 4-byte unsigned
-			 * integer in network byte order.
-			 * 
-			 * We're using pack() to generate the big-endian-formatted numbers.
-			 * 
-			 * As per the clamd man page, clamd requires a non-blocking
-			 * connection which means we need to roll our own polling solution--
-			 * this is managed by _clamDaemonShortPolling().
-			 */
-			stream_socket_sendto($clamDaemon, "zINSTREAM\0");
-
-			while (!feof($tmpFile)) {
-				// we don't need to pack the stream data
-				$data = fread($tmpFile, $maxInstreamSize);
-				// strlen returns the number of bytes in a string (which is why
-				// we should _normally_ use mb_strlen)
-				stream_socket_sendto($clamDaemon, pack("N", strlen($data)));
-				stream_socket_sendto($clamDaemon, $data);
-			}
-			// terminating INSTREAM with zero-length chunk
-			$data = pack("N", "");
-			stream_socket_sendto($clamDaemon, $data);
+                        stream_socket_sendto($clamDaemon, "zSCAN $uploadedFile\0");
 
 			// wait for output
-			$output = $this->_clamDaemonShortPolling($clamDaemon);
+			$output = $this->_clamDaemonShortPolling($clamDaemon, $uploadedFile);
 
 			// closing IDSESSION
 			stream_socket_sendto($clamDaemon, "nEND\0");
@@ -276,6 +249,7 @@ class ClamavPlugin extends GenericPlugin {
 			fclose($tmpFile);
 			fclose($clamDaemon);
 
+                        shell_exec("chmod $uploadedFileMods $uploadedFile");
 			if($output['safe'] === false) {
 				if($output['message'] == 'timeout') {
 					return $this->_clamscanBuildAlert($uploadedFileField, 'plugins.generic.clamav.timeout', $output['message']);
@@ -331,7 +305,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @param $intervals int Number of intervals to check; after $intervals checks, return.
 	 * @return string
 	 */
-	function _clamDaemonShortPolling($socket, $delay = 100000000, $intervals = 10) {
+	function _clamDaemonShortPolling($socket, $uploadedFile, $delay = 100000000, $intervals = 10) {
 		// author's note: cludge cludge cludge cludge. TODO: look into long polling for unix sockets?
 		$output = "";
 		$intervals = $this->getSetting(CONTEXT_SITE, 'clamavSocketTimeout')*10;
@@ -342,10 +316,10 @@ class ClamavPlugin extends GenericPlugin {
 			time_nanosleep(0, $delay);
 			$output = stream_get_contents($socket);
 			if ($output !== "") {
-				if($output == "1: stream: OK\0") {
-					return Array('safe' => true, 'message' => $output);
+				if($output == $uploadedFile.": OK\0") {
+					return Array('safe' => true, 'message' => "The file is safe.");
 				} else {
-					return Array('safe' => false, 'message' => substr($output, 11));
+					return Array('safe' => false, 'message' => substr($output, mb_strlen($uploadedFile)+2));
 				}
 			}
 		}
