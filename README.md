@@ -7,8 +7,15 @@ This plugin scans submission files using [Clam Antivirus](https://www.clamav.net
 * OJS 2.4.x
 * PHP 5.3 or later
 * Clam Antivirus
-  * You must be able to execute `clamscan --version` with output text indicating the ClamAV version
-  * Your version of `clamscan -i --no-summary <filename>` must exit with 1 on virus detection
+  * You can use clamd or the clamscan executable for scanning (clamd preferred).
+  * For clamd:
+    * You will need to specific the clamd socket as a string.  E.g. "/var/run/clamd/clamd.sock"
+    * The php sockets module is required.
+    * Your clamd daemon must be able to read apache temporary files.
+      * The plugin will try a temporary grant of world-read permissions if clamd initially responds 'Access denied'.
+  * For clamscan:
+    * You must be able to execute `clamscan --version` with output text indicating the ClamAV version
+    * Your version of `clamscan -i --no-summary <filename>` must exit with 1 on virus detection
 
 ## Installation
 
@@ -16,7 +23,7 @@ Install this as a "generic" plugin in OJS.  To install manually via the filesyst
 
 ## Configuration
 
-You must be the site administrator in order to enable or configure this plugin.  Enable this module and provide a path to the `clamscan` executable in the Settings.  A full path name is required.
+You must be the site administrator in order to enable or configure this plugin.  Enable this module and provide a path to the `clamscan` executable or to the clamd socket in the Settings.  A full path name is required.
 
 ## Usage
 
@@ -27,3 +34,5 @@ When uploading a submission file through the Author Submission Steps, or via the
 Written by Clinton Graham for the [University of Pittsburgh](http://www.pitt.edu).  Copyright (c) University of Pittsburgh.
 
 Released under a license of GPL v2 or later.
+
+Utilizes a library licensed under BSD (two-clause).
