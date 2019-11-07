@@ -195,12 +195,18 @@ class ClamavPlugin extends GenericPlugin {
 			$exitCode = NULL;
 			$path = $this->getSetting(CONTEXT_SITE, 'clamavPath');
 			if (is_executable($path)) {
-				$scan = exec($this->getSetting(CONTEXT_SITE, 'clamavPath').' -i --no-summary '.$uploadedFile, $output, $exitCode);
+				$scan = exec($path.' -i --no-summary '.$uploadedFile, $output, $exitCode);
 			} else {
 				$clam = new Clamav(array('clamd_sock' => $path));
-				$exitCode = $clam->scan($uploadedFile);
-				if ($exitCode) {
-					$output = $clam->getMessage();
+				// clamd process needs to be able to read this file.  Hack.
+				$originalPerms = octdec(substr(sprintf('%o', fileperms($path)), -4));
+				chmod($uploadedFile, $originalPerms | 4);
+				$result = $clam->scan($uploadedFile);
+				// Ok, unhack
+				chmod($uploadedFile, $originalPerms);
+				if (!$result) {
+					$exitCode = 1;
+					$scan = $clam->getMessage();
 				}
 			}
 			// If the scan returned anything, remove the temporary filename and report the error
