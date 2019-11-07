@@ -193,17 +193,21 @@ class ClamavPlugin extends GenericPlugin {
 			$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
 			$output = NULL;
 			$exitCode = NULL;
-			$path = $this->getSetting(CONTEXT_SITE, 'clamavPath');
-			if (is_executable($path)) {
-				$scan = exec($path.' -i --no-summary '.$uploadedFile, $output, $exitCode);
+			$clampath = $this->getSetting(CONTEXT_SITE, 'clamavPath');
+			if (is_executable($clampath)) {
+				$scan = exec($clampath.' -i --no-summary '.$uploadedFile, $output, $exitCode);
 			} else {
-				$clam = new Clamav(array('clamd_sock' => $path));
-				// clamd process needs to be able to read this file.  Hack.
-				$originalPerms = octdec(substr(sprintf('%o', fileperms($path)), -4));
-				chmod($uploadedFile, $originalPerms | 4);
+				$clam = new Clamav(array('clamd_sock' => $clampath));
 				$result = $clam->scan($uploadedFile);
-				// Ok, unhack
-				chmod($uploadedFile, $originalPerms);
+				if (!$result && strpos($clam->getMessage(), 'Access denied.') === 0) {
+					// clamd process needs to be able to read this file.  Hack.
+					$originalPerms = octdec(substr(sprintf('%o', fileperms($uploadedFile)), -4));
+					chmod($uploadedFile, $originalPerms | 4);
+					// try again
+					$result = $clam->scan($uploadedFile);
+					// Ok, unhack
+					chmod($uploadedFile, $originalPerms);
+				}
 				if (!$result) {
 					$exitCode = 1;
 					$scan = $clam->getMessage();
