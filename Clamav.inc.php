@@ -29,6 +29,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/*
+ PKP ClamavPlugin: incorporated this from https://github.com/kissit/php-clamav-scan at revision ddfc15a
+ Didn't use a git submodule so as to not include the test.php with the EICAR signature
+*/
+
 class Clamav {
     private $clamd_sock = "/var/run/clamav/clamd.sock";
     private $clamd_sock_len = 20000;

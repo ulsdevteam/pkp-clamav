@@ -13,6 +13,7 @@
  */
 
 import('lib.pkp.classes.plugins.GenericPlugin');
+import('plugins.generic.clamav.Clamav');
 
 class ClamavPlugin extends GenericPlugin {
 
@@ -172,6 +173,12 @@ class ClamavPlugin extends GenericPlugin {
 			if (preg_match('/^ClamAV .*/', $version)) {
 				return $version;
 			}
+		} else {
+			$clam = new Clamav(array('clamd_sock' => $path));
+			$version = $clam->send('VERSION');
+			if ($version) {
+				return $version;
+			}
 		}
 		return '';
 	}
@@ -186,7 +193,16 @@ class ClamavPlugin extends GenericPlugin {
 			$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
 			$output = NULL;
 			$exitCode = NULL;
-			$scan = exec($this->getSetting(CONTEXT_SITE, 'clamavPath').' -i --no-summary '.$uploadedFile, $output, $exitCode);
+			$path = $this->getSetting(CONTEXT_SITE, 'clamavPath');
+			if (is_executable($path)) {
+				$scan = exec($this->getSetting(CONTEXT_SITE, 'clamavPath').' -i --no-summary '.$uploadedFile, $output, $exitCode);
+			} else {
+				$clam = new Clamav(array('clamd_sock' => $path));
+				$exitCode = $clam->scan($uploadedFile);
+				if ($exitCode) {
+					$output = $clam->getMessage();
+				}
+			}
 			// If the scan returned anything, remove the temporary filename and report the error
 			if ($exitCode === 1) {
 				unlink($uploadedFile);

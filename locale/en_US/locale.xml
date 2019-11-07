@@ -20,7 +20,7 @@
 	<!-- Clam AV Settings Management -->
 	<message key="plugins.generic.clamav.manager.clamavSettings">ClamAV Settings</message>
 	<message key="plugins.generic.clamav.manager.settings.description"><![CDATA[<p>Please provide detail on how to execute Clam AV on your system.  You must already have <a href="https://www.clamav.net/">Clam AV</a> installed.</p>]]></message>
-	<message key="plugins.generic.clamav.manager.settings.clamavPath">The system path to Clam AV's clamscan executable.</message>
+	<message key="plugins.generic.clamav.manager.settings.clamavPath">The system path to Clam AV's clamscan executable (executable file or socket path).</message>
 	<message key="plugins.generic.clamav.manager.settings.clamavPathRequired">The system path to Clam AV's clamscan executable is required.</message>
 	<message key="plugins.generic.clamav.manager.settings.test">Test</message>
 	<message key="plugins.generic.clamav.manager.settings.version">Version:</message>
