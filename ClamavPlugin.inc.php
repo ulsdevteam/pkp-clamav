@@ -33,13 +33,12 @@ class ClamavPlugin extends GenericPlugin {
 	 * 	the plugin will not be registered.
 	 */
 	function register($category, $path, $mainContextId = NULL) {
-		$success = parent::register($category, $path, $mainContextId);
 		if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE'))
 			return true;
 		// Setting version information for backwards compatibility in other areas of the plugin
 		$versionDao = DAORegistry::getDAO('VersionDAO');
 		$this->currentAppVersion = $versionDao->getCurrentVersion();
-
+		$success = parent::register($category, $path, $mainContextId);
 		if ($success && $this->getEnabled()) {
 			// Enable Clam AV's preprocessing of uploaded files
 			HookRegistry::register('submissionfilesuploadform::validate', array($this, 'clamscanHandleUpload'));
