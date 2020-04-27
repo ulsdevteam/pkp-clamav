@@ -18,27 +18,15 @@ class ClamavPlugin extends GenericPlugin {
 	const TYPE_EXECUTABLE = 'executable';
 
 	/**
-	 * @var $currentAppVersion Version
-	 * 
-	 * This string holds the current version object returned by the VersionDAO
-	 * object. It's built in $this->register() and is used throughout the plugin
-	 * to support backwards compatibility with older versions of OJS.
-	 */
-	public $currentAppVersion = null;
-
-	/**
 	 * Called as a plugin is registered to the registry
 	 * @param $category String Name of category plugin was registered to
 	 * @return boolean True iff plugin initialized successfully; if false,
 	 * 	the plugin will not be registered.
 	 */
 	function register($category, $path, $mainContextId = NULL) {
+		$success = parent::register($category, $path, $mainContextId);
 		if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE'))
 			return true;
-		// Setting version information for backwards compatibility in other areas of the plugin
-		$versionDao = DAORegistry::getDAO('VersionDAO');
-		$this->currentAppVersion = $versionDao->getCurrentVersion();
-		$success = parent::register($category, $path, $mainContextId);
 		if ($success && $this->getEnabled()) {
 			// Enable Clam AV's preprocessing of uploaded files
 			HookRegistry::register('submissionfilesuploadform::validate', array($this, 'clamscanHandleUpload'));
@@ -79,8 +67,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @return 
 	 */
 	function _getBackwardsCompatibleContext() {
-		$versionCompare = $this->currentAppVersion->compare("3.2");
-		if($versionCompare >= 0) {
+		if(method_exists('Application', 'get')) {
 			// OJS 3.2 and later
 			$request = Application::get()->getRequest();
 			$context = $request->getContext();
@@ -146,9 +133,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @copydoc PKPPlugin::getTemplatePath
 	 */
 	function getTemplatePath($inCore = false) {
-		$versionCompare = $this->currentAppVersion ? $this->currentAppVersion->compare("3.1.2") : -1;
-
-		if($versionCompare >= 0) {
+		if(method_exists($this, 'getTemplateResource')) {
 			// OJS 3.1.2 and later
 			return parent::getTemplatePath($inCore);
 		} else {
