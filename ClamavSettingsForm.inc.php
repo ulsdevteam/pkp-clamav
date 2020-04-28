@@ -53,7 +53,8 @@ class ClamavSettingsForm extends Form {
 	function initData($request) {
 		$plugin = $this->_plugin;
 		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
-		$baseIndexUrl = $request->getIndexUrl();
+		import('classes.core.PageRouter');
+		$pgRouter = new PageRouter();
 
 		$this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
 		$this->setData('clamavUseSocket', $plugin->getSetting(CONTEXT_SITE, 'clamavUseSocket'));
@@ -66,7 +67,7 @@ class ClamavSettingsForm extends Form {
 		$this->setData('pluginStylesheetURL', $basePluginUrl . 'css' . DIRECTORY_SEPARATOR);
 		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
 		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
-		$this->setData('pluginAjaxUrl', $baseIndexUrl . DIRECTORY_SEPARATOR . 'clamav' . DIRECTORY_SEPARATOR . 'clamavVersion');
+		$this->setData('pluginAjaxUrl', $pgRouter->url($request, null, 'clamav', 'clamavVersion'));
 
 		$this->setData('baseUrl', $request->getBaseUrl());
 	}
