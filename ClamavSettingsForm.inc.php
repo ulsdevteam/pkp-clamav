@@ -53,7 +53,6 @@ class ClamavSettingsForm extends Form {
 	function initData($request) {
 		$plugin = $this->_plugin;
 		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
-		$baseIndexUrl = $request->getIndexUrl();
 		import('classes.core.PageRouter');
 		$pgRouter = new PageRouter();
 
