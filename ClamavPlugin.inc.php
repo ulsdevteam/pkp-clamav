@@ -240,12 +240,9 @@ class ClamavPlugin extends GenericPlugin {
 			stream_socket_sendto($clamDaemon, "zINSTREAM\0");
 
 			while (!feof($tmpFile)) {
-				// we don't need to pack the stream data
 				$data = fread($tmpFile, $maxInstreamSize);
-				// strlen returns the number of bytes in a string (which is why
-				// we should _normally_ use mb_strlen)
-				stream_socket_sendto($clamDaemon, pack("N", strlen($data)));
-				stream_socket_sendto($clamDaemon, $data);
+				$package = pack("N", strlen($data)).$data;
+				stream_socket_sendto($clamDaemon, $package);
 			}
 			// terminating INSTREAM with zero-length chunk
 			$data = pack("N", "");
