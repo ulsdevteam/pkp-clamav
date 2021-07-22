@@ -12,7 +12,7 @@ This plugin scans submission files using [Clam Antivirus](https://www.clamav.net
     * Your version of `clamscan -i --no-summary <filename>` must exit with 1 on virus detection
   * To run clamd
     * The clamd socket must be accessible by your webserver process
-      * For example, in RHEL7, making Apache a member of "virusgroup" and granting selinix privileges like "daemons_enable_cluster_mode" or "httpd_t antivirus_t:unix_stream_socket connectto".
+      * For example, in RHEL7, making Apache a member of "virusgroup" and granting selinux privileges like "daemons_enable_cluster_mode" or "httpd_t antivirus_t:unix_stream_socket connectto".
 
 ## Installation
 
