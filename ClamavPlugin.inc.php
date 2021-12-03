@@ -29,7 +29,7 @@ class ClamavPlugin extends GenericPlugin {
 			return true;
 		if ($success && $this->getEnabled()) {
 			// Enable Clam AV's preprocessing of uploaded files
-			HookRegistry::register('submissionfilesuploadform::validate', array($this, 'clamscanHandleUpload'));
+			HookRegistry::register('SubmissionFile::validate', array($this, 'clamscanHandleUpload'));
 			// Create handler for AJAX call
 			HookRegistry::register('LoadHandler', array($this, 'setPageHandler'));
 		}
