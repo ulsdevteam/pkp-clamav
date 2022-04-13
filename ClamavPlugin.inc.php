@@ -190,7 +190,9 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	function _clamscanFile($uploadedFileField) {
 		if ($this->getClamVersion() && !empty($uploadedFileField)  && isset($_FILES[$uploadedFileField]['tmp_name'])) {
-			$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
+ 			$uploadedFile = tempnam(Config::getVar('files', 'files_dir').'/temp/', 'clam');
+			chmod($uploadedFile, 644);
+			copy($_FILES[$uploadedFileField]['tmp_name'], $uploadedFile);
 			$output = NULL;
 			$exitCode = NULL;
 			$clampath = $this->getSetting(CONTEXT_SITE, 'clamavPath');
@@ -213,9 +215,10 @@ class ClamavPlugin extends GenericPlugin {
 					$scan = $clam->getMessage();
 				}
 			}
+			unlink($uploadedFile);
 			// If the scan returned anything, remove the temporary filename and report the error
-			if ($exitCode === 1) {
-				unlink($uploadedFile);
+			if ($exitCode === 1 || $exitCode === 2) {
+				unlink($_FILES[$uploadedFileField]['tmp_name']);
 				unset($_FILES[$uploadedFileField]);
 				$scan = str_replace($uploadedFile.': ', '', $scan);
 				$user =& Request::getUser();
