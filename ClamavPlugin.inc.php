@@ -189,15 +189,20 @@ class ClamavPlugin extends GenericPlugin {
 		if ($this->getClamVersion() && !empty($path) && !empty($fileId)) {
 			$output = "";
 			$exitCode = "";
-			$uploadedFile = '/var/www/vhosts/10.134.34.11/files/'. $path;
+			$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
                         $scan = "";
 			$scan = exec($this->getSetting(CONTEXT_SITE, 'clamavPath') . ' --no-summary -i ' . $uploadedFile, $output, $exitCode);
 			// If the scan returned anything, remove the temporary filename and report the error
                         
 			if ($exitCode === 1) {
+                                preg_match('/:(.*)/',$output[0],$matches);
+                                $threatName='Virus detected: ' . $matches[1];
                                 //$this->_clamscanBuildAlert($fileId, 'plugins.generic.clamav.uploadBlocked', );
-				return array('plugins.generic.clamav.uploadBlocked',$output[0]);
+				return array('plugins.generic.clamav.uploadBlocked',$threatName);
 			}
+                        if ($exitCode===2) {
+                            return array('plugins.generic.clamav.timeout', 'Virus scanning error');
+                        }
 		}
 		return '';
 	}
@@ -207,7 +212,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @param $uploadedFileField string array key in $_FILES for the file in question
 	 * @return string
 	 */
-	function _clamDaemonFile($uploadedFileField) {
+	function _clamDaemonFile($fileId, $path) {
 		$clamavSocketPath = $this->getSetting(CONTEXT_SITE, 'clamavSocketPath');
 		$maxInstreamSize = 1024; // TODO: need to universalize this based on a plugin setting
 		$output = "";
@@ -217,7 +222,7 @@ class ClamavPlugin extends GenericPlugin {
 		// stream_socket_client() seems to be preferred over older socket
 		// connections nowadays
 		$clamDaemon = stream_socket_client("$clamavSocketPath", $errno, $errorMessage);
-		$uploadedFile = $_FILES[$uploadedFileField]['tmp_name'];
+		$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
 		// open file for reading in binary mode
 		$tmpFile = fopen($uploadedFile, 'rb');
 
@@ -260,13 +265,13 @@ class ClamavPlugin extends GenericPlugin {
 
 			fclose($tmpFile);
 			fclose($clamDaemon);
-
+                        
 			if($output['safe'] === false) {
 				if($output['message'] == 'timeout') {
-					return $this->_clamscanBuildAlert($uploadedFileField, 'plugins.generic.clamav.timeout', $output['message']);
+					return array($fileId, 'plugins.generic.clamav.timeout', $output['message']);
 				} else {
 					// Virus detected
-					return $this->_clamscanBuildAlert($uploadedFileField, 'plugins.generic.clamav.uploadBlocked', $output['message']);
+					return array($fileId, 'plugins.generic.clamav.uploadBlocked', $output['message']);
 				}
 			}
 		}
@@ -359,7 +364,8 @@ class ClamavPlugin extends GenericPlugin {
 			if (!empty($message)) {
                                 $notification = $message[0];
                                 $error = $message[1];
-                                $this->_clamscanBuildAlert($fileName, $notification, $error); 
+                                $args[0][0]=$error;
+                                $this->_clamscanBuildAlert($fileName, $notification, $error);
                                 Services::get('file')->delete($fileId);
 				// returning true aborts processing
 				return true;
