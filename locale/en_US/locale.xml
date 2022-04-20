@@ -15,8 +15,8 @@
 	<!-- Clam AV -->
 	<message key="plugins.generic.clamav.displayName">Clam Antivirus</message>
 	<message key="plugins.generic.clamav.description"><![CDATA[Integrate OJS with ClamAV for uploaded submission files.  Through this plugin, OJS can scan each submission file at the time of upload, and will reject files which have virus signatures known to ClamAV.]]></message>
-	<message key="plugins.generic.clamav.uploadBlocked">Clam Antivirus blocked the uploaded file due to the virus signature "{$virusFound}" in file "{$fileName}".</message>
-	<message key="plugins.generic.clamav.timeout">Clam Antivirus was unable to complete its scan of the file "{$fileName}".</message>
+	<message key="plugins.generic.clamav.uploadBlocked">Clam Antivirus blocked this file due to the virus signature "{$threatname}".</message>
+	<message key="plugins.generic.clamav.timeout">Clam Antivirus was unable to complete its scan of this file".</message>
 	
 	<!-- Clam AV Settings Management -->
 	<message key="plugins.generic.clamav.manager.clamavSettings">Clam AV Settings</message>
