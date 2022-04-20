@@ -151,7 +151,6 @@ class ClamavPlugin extends GenericPlugin {
 	function getClamVersion($path = '', $type=self::TYPE_EXECUTABLE) {
 		if ($path === '') {
 			$path = $this->getSetting(CONTEXT_SITE, 'clamavPath');
-                        $executable = is_executable($path);
 		}
 		if ($type === self::TYPE_EXECUTABLE && !empty($path) && is_executable($path)) {
 			$version = exec($path . ' --version');
@@ -185,24 +184,34 @@ class ClamavPlugin extends GenericPlugin {
 	 * @param $uploadedFileField string The field index in $_FILES[] which references the uploaded file
 	 * @return string
 	 */
-	function _clamscanFile($fileId, $path) {
-		if ($this->getClamVersion() && !empty($path) && !empty($fileId)) {
+	function _clamscanFile($props, $uploadedFile) {
+		if ($this->getClamVersion() && !empty($uploadedFile)) {
 			$output = "";
 			$exitCode = "";
-			$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
-                        $scan = "";
 			$scan = exec($this->getSetting(CONTEXT_SITE, 'clamavPath') . ' --no-summary -i ' . $uploadedFile, $output, $exitCode);
-			// If the scan returned anything, remove the temporary filename and report the error
-                        
+			// Virus detected
 			if ($exitCode === 1) {
-                                preg_match('/:(.*)/',$output[0],$matches);
-                                $threatName='Virus detected: ' . $matches[1];
-                                //$this->_clamscanBuildAlert($fileId, 'plugins.generic.clamav.uploadBlocked', );
-				return array('plugins.generic.clamav.uploadBlocked',$threatName);
+				//For Clam's error message: pull out just the part after the colon
+				preg_match('/:(.*)/',$output[0],$matches);
+				$virusID=$matches[1];
+				$schemaService = Services::get('schema');
+				$threatName=["threatname"=>$virusID];
+
+				import('lib.pkp.classes.validation.ValidatorFactory');
+				$validator = \ValidatorFactory::make(
+					$props,
+					$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
+					$threatName
+				);
+				$validator->errors()->add('virusDetected', __('plugins.generic.clamav.uploadBlocked',$threatName));
+				$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
+
+				return $errors;
 			}
-                        if ($exitCode===2) {
-                            return array('plugins.generic.clamav.timeout', 'Virus scanning error');
-                        }
+			//Error
+			if ($exitCode===2) {
+				return array('plugins.generic.clamav.timeout', 'Virus scanning error');
+			}
 		}
 		return '';
 	}
@@ -265,7 +274,6 @@ class ClamavPlugin extends GenericPlugin {
 
 			fclose($tmpFile);
 			fclose($clamDaemon);
-                        
 			if($output['safe'] === false) {
 				if($output['message'] == 'timeout') {
 					return array($fileId, 'plugins.generic.clamav.timeout', $output['message']);
@@ -346,27 +354,28 @@ class ClamavPlugin extends GenericPlugin {
 	 * @see submissionfilesuploadform::validate()
 	 */
 	function clamscanHandleUpload($hookName, $args) {
-		// $args was once used to identify the array key of the file being scanned.
-                $fileId = $args[2]['fileId'];
-                $fileName = $args[2]['name']['en_US'];
-                $file = Services::get('file')->get($fileId);
-                $path = $file->path;
-                //scan for viruses if file exists
+		$fileId = $args[2]['fileId'];
+		$submissionProperties = $args[2];
+		$file = Services::get('file')->get($fileId);
+		$path = $file->path;
+		$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
+		//scan for viruses if file exists
 		if (null !== $file) {
 			$useSocket = $this->getSetting(CONTEXT_SITE, 'clamavUseSocket');
 			if ($useSocket === true) {
-				$message = $this->_clamDaemonFile('file');
+				$message = $this->_clamDaemonFile($uploadedFile);
 			} else {
-				$message = $this->_clamscanFile($fileId, $path);
+				$message = $this->_clamscanFile($submissionProperties, $uploadedFile);
 			}
 
 			
 			if (!empty($message)) {
-                                $notification = $message[0];
-                                $error = $message[1];
-                                $args[0][0]=$error;
-                                $this->_clamscanBuildAlert($fileName, $notification, $error);
-                                Services::get('file')->delete($fileId);
+				$notification = $message[0];
+				$error = $message[1];
+				if ($args[0]===null){
+					$args[0]=$message;
+				}
+				Services::get('file')->delete($fileId);
 				// returning true aborts processing
 				return true;
 			}
