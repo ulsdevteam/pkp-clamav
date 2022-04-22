@@ -185,7 +185,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @param $uploadedFile string Path to the uploaded file in OJS's files directory
 	 * @return string
 	 */
-	function _clamscanFile($props, $uploadedFile) {
+	function _clamscanFile($uploadedFile) {
 		if ($this->getClamVersion() && !empty($uploadedFile)) {
 			$output = "";
 			$exitCode = "";
@@ -195,19 +195,7 @@ class ClamavPlugin extends GenericPlugin {
 				//For Clam's error message: pull out just the part after the colon
 				preg_match('/:(.*)/',$output[0],$matches);
 				$virusID=trim($matches[1]);
-				$schemaService = Services::get('schema');
-				$threatName=["threatname"=>$virusID];
-
-				import('lib.pkp.classes.validation.ValidatorFactory');
-				$validator = \ValidatorFactory::make(
-					$props,
-					$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
-					$threatName
-				);
-				$validator->errors()->add('virusDetected', __('plugins.generic.clamav.uploadBlocked',$threatName));
-				$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
-
-				return $errors;
+				return $virusID;
 			}
 			//Error
 			if ($exitCode===2) {
@@ -326,7 +314,8 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	function clamscanHandleUpload($hookName, $args) {
 		$fileId = $args[2]['fileId'];
-		$submissionProperties = $args[2];
+		$props = $args[2];
+		$allowedLocales = $args[3];
 		$file = Services::get('file')->get($fileId);
 		$path = $file->path;
 		$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
@@ -336,26 +325,38 @@ class ClamavPlugin extends GenericPlugin {
 			if ($useSocket === true) {
 				$message = $this->_clamDaemonFile($uploadedFile);
 			} else {
-				$message = $this->_clamscanFile($submissionProperties, $uploadedFile);
+				$message = $this->_clamscanFile($uploadedFile);
 			}
-
-			
-			if (!empty($message)) {
-				$notification = $message[0];
-				$error = $message[1];
-				if ($args[0]===null){
-					$args[0]=$message;
+			//Virus found
+			if ($message == true) {
+				$threatName=["threatname"=>$message];
+				import('lib.pkp.classes.validation.ValidatorFactory');
+				$schemaService = Services::get('schema');
+				$validator = \ValidatorFactory::make(
+					$props,
+					$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
+					$threatName
+				);
+				$validator->errors()->add('virusDetected', __('plugins.generic.clamav.uploadBlocked',$threatName));
+				$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
+	
+			if ($args[0]===null){
+					$args[0]=$errors;
 				}
 				elseif (is_array($args[0])) {
-					array_push($args[0],$message);
+					array_push($args[0],$errors);
 				}
+				//Clean up rejected file
 				Services::get('file')->delete($fileId);
 				// returning true aborts processing
 				return true;
-			}
+				}
 		}
+		//No virus
+		else {
 		// returning false allows processing to continue
 		return false;
+		}
 	}
 
 	/**
