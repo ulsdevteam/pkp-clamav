@@ -199,7 +199,8 @@ class ClamavPlugin extends GenericPlugin {
 			}
 			//Error
 			if ($exitCode===2) {
-				return array('plugins.generic.clamav.timeout', 'Virus scanning error');
+				throw new Exception("ClamAV was unable to scan the file");
+				//return array('plugins.generic.clamav.timeout', 'Virus scanning error');
 			}
 		}
 		return '';
@@ -210,7 +211,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @param $uploadedFileField string array key in $_FILES for the file in question
 	 * @return string
 	 */
-	function _clamDaemonFile($fileId, $path) {
+	function _clamDaemonFile($uploadedFile) {
 		$clamavSocketPath = $this->getSetting(CONTEXT_SITE, 'clamavSocketPath');
 		$maxInstreamSize = 1024; // TODO: need to universalize this based on a plugin setting
 		$output = "";
@@ -220,7 +221,6 @@ class ClamavPlugin extends GenericPlugin {
 		// stream_socket_client() seems to be preferred over older socket
 		// connections nowadays
 		$clamDaemon = stream_socket_client("$clamavSocketPath", $errno, $errorMessage);
-		$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
 		// open file for reading in binary mode
 		$tmpFile = fopen($uploadedFile, 'rb');
 
@@ -265,11 +265,12 @@ class ClamavPlugin extends GenericPlugin {
 			fclose($clamDaemon);
 			if($output['safe'] === false) {
 				if($output['message'] == 'timeout') {
-					return array($fileId, 'plugins.generic.clamav.timeout', $output['message']);
+					return $output['message'];
 				} else {
 					// Virus detected
-					return array($fileId, 'plugins.generic.clamav.uploadBlocked', $output['message']);
+					return $output['message'];
 				}
+				//errors?
 			}
 		}
 		// TODO: how do we clear old notifications?
@@ -329,6 +330,10 @@ class ClamavPlugin extends GenericPlugin {
 			}
 			//Virus found
 			if ($message == true) {
+				if ($message == 'timeout' && $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')==="UNSCANNED_ALLOW"){
+					//allow file when timeout setting is permissive
+					return false;
+				}
 				$threatName=["threatname"=>$message];
 				import('lib.pkp.classes.validation.ValidatorFactory');
 				$schemaService = Services::get('schema');
@@ -337,7 +342,7 @@ class ClamavPlugin extends GenericPlugin {
 					$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
 					$threatName
 				);
-				$validator->errors()->add('virusDetected', __('plugins.generic.clamav.uploadBlocked',$threatName));
+				$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$threatName));
 				$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
 	
 			if ($args[0]===null){
