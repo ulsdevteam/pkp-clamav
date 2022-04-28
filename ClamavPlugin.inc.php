@@ -192,7 +192,6 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	function _clamscanFile($uploadedFile) {
 		if ($this->getClamVersion() && !empty($uploadedFile)) {
-			$uploadedFile="jimmy.txt";
 			$output = "";
 			$exitCode = "";
 			$clamAVPath = $this->getSetting(CONTEXT_SITE, 'clamavPath');
@@ -331,7 +330,14 @@ class ClamavPlugin extends GenericPlugin {
 		//scan for viruses if file exists
 		if (null !== $file) {
 			$useSocket = $this->getSetting(CONTEXT_SITE, 'clamavUseSocket');
-			
+			import('lib.pkp.classes.validation.ValidatorFactory');
+			$schemaService = Services::get('schema');
+			$rejectionMessage = array();
+			$validator = \ValidatorFactory::make(
+				$props,
+				$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
+				$rejectionMessage
+			);
 			try {
 				if ($useSocket === true) {
 					$message = $this->_clamDaemonFile($uploadedFile);
@@ -347,13 +353,6 @@ class ClamavPlugin extends GenericPlugin {
 					else {
 						//Prepare to notify the user and halt the upload process
 						$rejectionMessage = ["threatname"=>$message];
-						import('lib.pkp.classes.validation.ValidatorFactory');
-						$schemaService = Services::get('schema');
-						$validator = \ValidatorFactory::make(
-							$props,
-							$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
-							$rejectionMessage
-						);
 						//If Clam found a virus, it will return the signature name as a string
 						if ($message == true) {
 							//create a user notification
