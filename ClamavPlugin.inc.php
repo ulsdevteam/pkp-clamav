@@ -12,6 +12,7 @@
  * @brief ClamAV plugin class
  */
 import('lib.pkp.classes.plugins.GenericPlugin');
+class ClamScanFailureException extends Exception {};
 
 class ClamavPlugin extends GenericPlugin {
 	const TYPE_SOCKET = 'socket';
@@ -187,23 +188,26 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	function _clamscanFile($uploadedFile) {
 		if ($this->getClamVersion() && !empty($uploadedFile)) {
+			$uploadedFile="jimmy.txt";
 			$output = "";
 			$exitCode = "";
-			$scan = exec($this->getSetting(CONTEXT_SITE, 'clamavPath') . ' --no-summary -i ' . $uploadedFile, $output, $exitCode);
-			// Virus detected
-			if ($exitCode === 1) {
-				//For Clam's error message: pull out just the part after the colon
-				preg_match('/:(.*)/',$output[0],$matches);
-				$virusID=trim($matches[1]);
-				return $virusID;
-			}
-			//Error
-			if ($exitCode===2) {
-				throw new Exception("ClamAV was unable to scan the file");
-				//return array('plugins.generic.clamav.timeout', 'Virus scanning error');
+			$clamAVPath = $this->getSetting(CONTEXT_SITE, 'clamavPath');
+			$scan = exec($clamAVPath . ' --no-summary -i ' . $uploadedFile, $output, $exitCode);
+			//process the result
+			preg_match('/:(.*)/',$output[0],$matches);
+			$virusID=trim($matches[1]);
+			switch ($exitCode) {
+				//clean
+				case 0:
+					return false;
+				//virus found!
+				case 1: 
+					return $virusID;
+				//failed to scan
+				case 2:
+					throw new ClamScanFailureException("ClamAV failed to scan the file");
 			}
 		}
-		return '';
 	}
 
 	/**
@@ -323,44 +327,63 @@ class ClamavPlugin extends GenericPlugin {
 		//scan for viruses if file exists
 		if (null !== $file) {
 			$useSocket = $this->getSetting(CONTEXT_SITE, 'clamavUseSocket');
+			//Daemon
 			if ($useSocket === true) {
-				$message = $this->_clamDaemonFile($uploadedFile);
-			} else {
-				$message = $this->_clamscanFile($uploadedFile);
-			}
-			//Virus found
-			if ($message == true) {
-				if ($message == 'timeout' && $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')==="UNSCANNED_ALLOW"){
-					//allow file when timeout setting is permissive
-					return false;
+				try {
+					$message = $this->_clamDaemonFile($uploadedFile);
+					//safe, continue with submission
+					if ($message == false) {
+						return false;
+					}
 				}
-				$threatName=["threatname"=>$message];
+				catch (ClamScanFailureException $e){
+					//couldn't scan, but ClamAV settings are permissive, continue with submission
+					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')==="UNSCANNED_ALLOW") {
+						return false;
+					}
+				}
+			//clamscan executable	
+			} else {
+				try {
+					$message = $this->_clamscanFile($uploadedFile);
+					//safe, continue with submission
+					if ($message == false) {
+						return false;
+					}
+				}
+				catch (ClamScanFailureException $e){
+					//couldn't scan, but ClamAV settings are permissive, continue with submission
+					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')==="UNSCANNED_ALLOW") {
+						return false;
+					}
+					else {
+						$message = $e->getMessage();
+					}
+				}
+			}
+//if the file is considered unsafe, proceed with cleanup
+				$rejectionMessage = ["threatname"=>$message];
 				import('lib.pkp.classes.validation.ValidatorFactory');
 				$schemaService = Services::get('schema');
 				$validator = \ValidatorFactory::make(
 					$props,
 					$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
-					$threatName
+					$rejectionMessage
 				);
-				$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$threatName));
+				$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$rejectionMessage));
 				$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
 	
 			if ($args[0]===null){
 					$args[0]=$errors;
-				}
-				elseif (is_array($args[0])) {
-					array_push($args[0],$errors);
-				}
-				//Clean up rejected file
-				Services::get('file')->delete($fileId);
-				// returning true aborts processing
-				return true;
-				}
-		}
-		//No virus
-		else {
-		// returning false allows processing to continue
-		return false;
+			}
+			elseif (is_array($args[0])) {
+				array_push($args[0],$errors);
+			}
+			//Clean up rejected file
+			Services::get('file')->delete($fileId);
+			// returning true aborts processing
+			return true;
+			
 		}
 	}
 
