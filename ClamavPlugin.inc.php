@@ -17,6 +17,10 @@ class ClamScanFailureException extends Exception {};
 class ClamavPlugin extends GenericPlugin {
 	const TYPE_SOCKET = 'socket';
 	const TYPE_EXECUTABLE = 'executable';
+	const TIMEOUT_DEFAULT = 30;
+	const UNSCANNED_DEFAULT = 'allow';
+	const UNSCANNED_ALLOW = 'allow';
+	const UNSCANNED_BLOCK = 'block';
 
 	/**
 	 * Called as a plugin is registered to the registry
@@ -327,51 +331,52 @@ class ClamavPlugin extends GenericPlugin {
 		//scan for viruses if file exists
 		if (null !== $file) {
 			$useSocket = $this->getSetting(CONTEXT_SITE, 'clamavUseSocket');
-			//Daemon
-			if ($useSocket === true) {
-				try {
+			
+			try {
+				if ($useSocket === true) {
 					$message = $this->_clamDaemonFile($uploadedFile);
-					//safe, continue with submission
-					if ($message == false) {
-						return false;
-					}
 				}
-				catch (ClamScanFailureException $e){
-					//couldn't scan, but ClamAV settings are permissive, continue with submission
-					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')==="UNSCANNED_ALLOW") {
-						return false;
-					}
-				}
-			//clamscan executable	
-			} else {
-				try {
+				else {
 					$message = $this->_clamscanFile($uploadedFile);
-					//safe, continue with submission
-					if ($message == false) {
-						return false;
-					}
 				}
-				catch (ClamScanFailureException $e){
-					//couldn't scan, but ClamAV settings are permissive, continue with submission
-					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')==="UNSCANNED_ALLOW") {
+					//No viruses found! Continue with submission
+					if ($message === false) {
 						return false;
 					}
+					//ClamAV reported a virus or failed to complete the scan
 					else {
-						$message = $e->getMessage();
+						//Prepare to notify the user and halt the upload process
+						$rejectionMessage = ["threatname"=>$message];
+						import('lib.pkp.classes.validation.ValidatorFactory');
+						$schemaService = Services::get('schema');
+						$validator = \ValidatorFactory::make(
+							$props,
+							$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
+							$rejectionMessage
+						);
+						//If Clam found a virus, it will return the signature name as a string
+						if ($message == true) {
+							//create a user notification
+							$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$rejectionMessage));
+						}
 					}
-				}
+					
 			}
-//if the file is considered unsafe, proceed with cleanup
-				$rejectionMessage = ["threatname"=>$message];
-				import('lib.pkp.classes.validation.ValidatorFactory');
-				$schemaService = Services::get('schema');
-				$validator = \ValidatorFactory::make(
-					$props,
-					$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
-					$rejectionMessage
-				);
-				$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$rejectionMessage));
-				$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
+			//Scanning errors will generate a custom exception
+			catch (ClamScanFailureException $e){
+					//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
+					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===UNSCANNED_ALLOW) {
+						return false;
+					}
+					//Otherwise notify the user that there was an error
+					else {
+						//the user will see the general error message from the locale file
+						$validator->errors()->add('clamAV::failedToScan', __('plugins.generic.clamav.error'));
+					}
+			}
+
+			//The file is considered unsafe. Interrupt submission process and clean up the working copy/metadata
+			$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
 	
 			if ($args[0]===null){
 					$args[0]=$errors;

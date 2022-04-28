@@ -21,7 +21,7 @@ msgid "plugins.generic.clamav.uploadBlocked"
 msgstr "Clam Antivirus blocked this file due to the virus signature \"{$threatname}\"."
 
 msgid "plugins.generic.clamav.timeout"
-msgstr "Clam Antivirus was unable to complete its scan of this file"."
+msgstr "Clam Antivirus was unable to complete its scan of this file"
 
 msgid "plugins.generic.clamav.manager.clamavSettings"
 msgstr "Clam AV Settings"
