@@ -100,11 +100,11 @@ class ClamavSettingsForm extends Form {
 		// these fields aren't mandatory.
 		$clamavSocketTimeout = $this->getData('clamavSocketTimeout');
 		if((int) $clamavSocketTimeout < 1) {
-			$clamavSocketTimeout = self::TIMEOUT_DEFAULT;
+			$clamavSocketTimeout = $this->_plugin::TIMEOUT_DEFAULT;
 		}
 		$allowUnscannedFiles = $this->getData('allowUnscannedFiles');
-		if((string) $allowUnscannedFiles !== self::UNSCANNED_ALLOW && (string) $allowUnscannedFiles !== self::UNSCANNED_BLOCK) {
-			$allowUnscannedFiles = self::UNSCANNED_DEFAULT;
+		if((string) $allowUnscannedFiles !== $this->_plugin::UNSCANNED_ALLOW && (string) $allowUnscannedFiles !== $this->_plugin::UNSCANNED_BLOCK) {
+			$allowUnscannedFiles = $this->_plugin::UNSCANNED_DEFAULT;
 		}
 
 		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavPath', $this->getData('clamavPath'), 'string');
