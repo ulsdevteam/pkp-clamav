@@ -14,10 +14,6 @@
 import('lib.pkp.classes.form.Form');
 
 class ClamavSettingsForm extends Form {
-	const TIMEOUT_DEFAULT = 30;
-	const UNSCANNED_DEFAULT = 'allow';
-	const UNSCANNED_ALLOW = 'allow';
-	const UNSCANNED_BLOCK = 'block';
 
 	/** @var int */
 	var $_contextId;

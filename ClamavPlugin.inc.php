@@ -364,7 +364,7 @@ class ClamavPlugin extends GenericPlugin {
 			//Scanning errors will generate a custom exception
 			catch (ClamScanFailureException $e){
 					//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
-					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===UNSCANNED_ALLOW) {
+					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===$this->_plugin::UNSCANNED_ALLOW) {
 						return false;
 					}
 					//Otherwise notify the user that there was an error
