@@ -341,39 +341,34 @@ class ClamavPlugin extends GenericPlugin {
 			try {
 				if ($useSocket === true) {
 					$message = $this->_clamDaemonFile($uploadedFile);
-				}
-				else {
+				} else {
 					$message = $this->_clamscanFile($uploadedFile);
 				}
-					//No viruses found! Continue with submission
-					if ($message === false) {
-						return false;
-					}
+				//No viruses found! Continue with submission
+				if ($message === false) {
+					return false;
+				} else {
 					//ClamAV reported a virus or failed to complete the scan
-					else {
-						//Prepare to notify the user and halt the upload process
-						$rejectionMessage = ["threatname"=>$message];
-						//If Clam found a virus, it will return the signature name as a string
-						if ($message == true) {
-							//create a user notification
-							$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$rejectionMessage));
-						}
+					//Prepare to notify the user and halt the upload process
+					$rejectionMessage = ["threatname"=>$message];
+					//If Clam found a virus, it will return the signature name as a string
+					if ($message == true) {
+						//create a user notification
+						$validator->errors()->add('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$rejectionMessage));
 					}
-					
+				}
 			}
 			//Scanning errors will generate a custom exception
 			catch (ClamScanFailureException $e){
 					//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
 				$setting=$this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles');
-				$setting2=self::UNSCANNED_ALLOW;
-					if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===self::UNSCANNED_ALLOW) {
-						return false;
-					}
+				if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===self::UNSCANNED_ALLOW) {
+					return false;
+				} else {
 					//Otherwise notify the user that there was an error
-					else {
-						//the user will see the general error message from the locale file
-						$validator->errors()->add('clamAV::failedToScan', __('plugins.generic.clamav.error'));
-					}
+					//the user will see the general error message from the locale file
+					$validator->errors()->add('clamAV::failedToScan', __('plugins.generic.clamav.error'));
+				}
 			}
 
 			//The file is considered unsafe. Interrupt submission process and clean up the working copy/metadata
@@ -381,8 +376,7 @@ class ClamavPlugin extends GenericPlugin {
 	
 			if ($args[0]===null){
 					$args[0]=$errors;
-			}
-			elseif (is_array($args[0])) {
+			} elseif (is_array($args[0])) {
 				array_push($args[0],$errors);
 			}
 			//Clean up rejected file
