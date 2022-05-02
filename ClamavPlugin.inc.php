@@ -272,7 +272,7 @@ class ClamavPlugin extends GenericPlugin {
 			fclose($clamDaemon);
 			if($output['safe'] === false) {
 				if($output['message'] == 'timeout') {
-					return $output['message'];
+					throw new ClamScanFailureException("ClamAV failed to scan the file");
 				} else {
 					// Virus detected
 					return $output['message'];
@@ -281,7 +281,7 @@ class ClamavPlugin extends GenericPlugin {
 			}
 		}
 		// TODO: how do we clear old notifications?
-		return ''; // no virus detected
+		return false; // no virus detected
 	}
 
 	/**
