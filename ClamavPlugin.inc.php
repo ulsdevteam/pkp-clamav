@@ -186,9 +186,9 @@ class ClamavPlugin extends GenericPlugin {
 
 	/**
 	 * Private helper method to scan a file using the clamscan executable, returning a virus message if matched
-	 * @param $props array Information about the uploaded file from the OJS database
 	 * @param $uploadedFile string Path to the uploaded file in OJS's files directory
-	 * @return string
+	 * @throws ClamScanFailureException
+	 * @return boolean|string
 	 */
 	function _clamscanFile($uploadedFile) {
 		if ($this->getClamVersion() && !empty($uploadedFile)) {
@@ -215,8 +215,8 @@ class ClamavPlugin extends GenericPlugin {
 
 	/**
 	 * Private helper method to scan a file using the clamav daemon
-	 * @param $uploadedFileField string array key in $_FILES for the file in question
-	 * @return string
+	 * @param $uploadedFile string The path to the file to be scanned
+	 * @return boolean|string
 	 */
 	function _clamDaemonFile($uploadedFile) {
 		$clamavSocketPath = $this->getSetting(CONTEXT_SITE, 'clamavSocketPath');
@@ -284,6 +284,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @param $socket stream resource The streaming socket resource.
 	 * @param $delay int Time between short polls, measured in nanoseconds
 	 * @param $intervals int Number of intervals to check; after $intervals checks, return.
+	 * @throws ClamScanFailureException
 	 * @return string
 	 */
 	function _clamDaemonShortPolling($socket, $delay = 100000000, $intervals = 10) {
