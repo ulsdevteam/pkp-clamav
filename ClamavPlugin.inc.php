@@ -270,18 +270,13 @@ class ClamavPlugin extends GenericPlugin {
 
 			fclose($tmpFile);
 			fclose($clamDaemon);
+			if($output['safe'] === true) {
+				return false;
+			}
 			if($output['safe'] === false) {
-				if($output['message'] == 'timeout') {
-					throw new ClamScanFailureException("ClamAV failed to scan the file");
-				} else {
-					// Virus detected
-					return $output['message'];
-				}
-				//errors?
+				return $output['message'];
 			}
 		}
-		// TODO: how do we clear old notifications?
-		return false; // no virus detected
 	}
 
 	/**
@@ -308,11 +303,7 @@ class ClamavPlugin extends GenericPlugin {
 					return Array('safe' => false, 'message' => substr($output, 11));
 				}
 			}
-		}
-		if($failover === "block") {
-			return Array('safe' => false, 'message' => 'timeout');
-		} else {
-			return Array('safe' => true, '');
+			throw new ClamScanFailureException("ClamAV failed to scan the file");
 		}
 	}
 
