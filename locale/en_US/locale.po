@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-11-12T10:24:49-05:00\n"
+"PO-Revision-Date: 2021-11-12T10:24:49-05:00\n"
+"Language: \n"
+
+msgid "plugins.generic.clamav.displayName"
+msgstr "Clam Antivirus"
+
+msgid "plugins.generic.clamav.description"
+msgstr "Integrate OJS with ClamAV for uploaded submission files.  Through this plugin, OJS can scan each submission file at the time of upload, and will reject files which have virus signatures known to ClamAV."
+
+msgid "plugins.generic.clamav.uploadBlocked"
+msgstr "Clam Antivirus blocked this file due to the virus signature \"{$threatname}\"."
+
+msgid "plugins.generic.clamav.error"
+msgstr "Clam Antivirus was unable to complete its scan of this file."
+
+msgid "plugins.generic.clamav.manager.clamavSettings"
+msgstr "Clam AV Settings"
+
+msgid "plugins.generic.clamav.manager.settings.description"
+msgstr "<p>Please provide detail on how to execute Clam AV on your system.  You must already have <a href=\"https://www.clamav.net/\">Clam AV</a> installed.</p>"
+
+msgid "plugins.generic.clamav.manager.settings.clamavPath"
+msgstr "The system path to Clam AV's clamscan executable."
+
+msgid "plugins.generic.clamav.manager.settings.clamavPathRequired"
+msgstr "The system path to Clam AV's clamscan executable is required."
+
+msgid "plugins.generic.clamav.manager.settings.test"
+msgstr "Test"
+
+msgid "plugins.generic.clamav.manager.settings.version"
+msgstr "Clam AV version detected"
+
+msgid "plugins.generic.clamav.manager.settings.noversion"
+msgstr "Clam AV version not found."
+
+msgid "plugins.generic.clamav.manager.settings.networkProblem"
+msgstr "Problem connecting to the server."
+
+msgid "plugins.generic.clamav.manager.settings.clamExecutableVersion"
+msgstr "Clam AV version:"
+
+msgid "plugins.generic.clamav.manager.settings.daemon"
+msgstr "ClamAV Daemon"
+
+msgid "plugins.generic.clamav.manager.settings.daemon.description"
+msgstr "If the clamd daemon is available on your system, you can use it to scan uploaded files instead of the clamscan executable. Unlike clamscan, the clamd daemon keeps its virus definitions in memory between scans, reducing latency."
+
+msgid "plugins.generic.clamav.manager.settings.clamavUseSocket"
+msgstr "Connect to the Clam AV daemon instead?"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketPath"
+msgstr "The system path to Clam AV's clamd.sock socket."
+
+msgid "plugins.generic.clamav.manager.settings.clamSocketVersion"
+msgstr "Clam AV version:"
+
+msgid "plugins.generic.clamav.manager.settings.advanced"
+msgstr "Advanced"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout"
+msgstr "Timeout in seconds."
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout.units"
+msgstr "seconds"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles"
+msgstr "Allow or block unscanned files?"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow"
+msgstr "Allow Unscanned Files"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.block"
+msgstr "Block Unscanned Files"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"
+msgstr "If a scan of a file takes longer than the timeout setting or there is an error during the scanning process, the scan will not complete. How the plugin treats these \"unscanned files\" is determined by the second setting. Allowing these unscanned files means that files that cannot be scanned in time will be successfully uploaded; blocking unscanned files means that files that cannot be scanned will be blocked and cannot be uploaded. Blocking files when they cannot be scanned is safer, but may cause problems for legitimate users."
