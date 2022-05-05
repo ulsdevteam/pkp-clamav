@@ -24,7 +24,7 @@ To install manually via the filesystem, extract the contents of this archive to 
 
 You must be the site administrator in order to enable or configure this plugin.  Enable this module and provide a path to the `clamscan` or `clamdscan` executable or to a `clamd` socket in the Settings.  A full path name is required.  The `clamdscan` executable or clamd daemon will provide better performace than loading the executable for each scan, since the daemon keeps the virus defintions in memory.  If you wish to use the clamd daemon, you must have the clam daemon installed and available to Apache.
 
-Most users will probably want to use a unix socket connection; in this case, prepend "unix://" to the path. (For example, "unix:///var/run/clamav/clamd.sock" in RHEL or "unix:///var/run/clamav/clamd.ctl" in Ubunutu). This plugin has not been extensively tested with other socket connections.
+Most users will probably want to use a unix socket connection; in this case, prepend "unix://" to the path. (For example, "unix:///var/run/clamav/clamd.sock" in RHEL or "unix:///var/run/clamav/clamd.ctl" in Ubuntu). This plugin has not been extensively tested with other socket connections.
 
 If a file is unable to be scanned (for example due to an error or timeout) you can choose whether it will be either allowed through or blocked, through an "Advanced" configuration option.
 
