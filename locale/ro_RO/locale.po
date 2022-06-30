@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msged-Bugs-To: \n"
+"Last-Translator: Cristina Bleorțu, Martin Brändle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-11-12T10:24:49-05:00\n"
+"PO-Revision-Date: 2022-06-15T16:09:49+01:00\n"
+"Language: ro_RO\n"
+
+msgid "plugins.generic.clamav.displayName"
+msgstr "Clam Antivirus"
+
+msgid "plugins.generic.clamav.description"
+msgstr "Integrarea OJS cu ClamAV pentru fișierele trimise încărcate.  Prin intermediul acestui plugin, OJS poate scana fiecare fișier trimis în momentul încărcării și va respinge fișierele care au semnături de virus cunoscute de ClamAV."
+
+msgid "plugins.generic.clamav.uploadBlocked"
+msgstr "Clam Antivirus a blocat acest fișier din cauza semnăturii virusului \"{$threatname}\"."
+
+msgid "plugins.generic.clamav.error"
+msgstr "Clam Antivirus nu a reușit să finalizeze scanarea acestui fișier."
+
+msgid "plugins.generic.clamav.manager.clamavSettings"
+msgstr "Setări Clam AV"
+
+msgid "plugins.generic.clamav.manager.settings.description"
+msgstr "<p>Vă rugăm să furnizați detalii despre cum să executați Clam AV în sistemul dumneavoastră.  Trebuie să aveți deja instalat <a href=\"https://www.clamav.net/\">Clam AV</a>.</p>"
+
+msgid "plugins.generic.clamav.manager.settings.clamavPath"
+msgstr "Ruta de acces din sistem către executabilul clamscan al Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamavPathRequired"
+msgstr "Este necesară ruta sistemului către executabilul clamscan al Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.test"
+msgstr "Test"
+
+msgid "plugins.generic.clamav.manager.settings.version"
+msgstr "Versiunea Clam AV detectată"
+
+msgid "plugins.generic.clamav.manager.settings.noversion"
+msgstr "Versiunea Clam AV nu a fost găsită."
+
+msgid "plugins.generic.clamav.manager.settings.networkProblem"
+msgstr "Probleme de conectare la server."
+
+msgid "plugins.generic.clamav.manager.settings.clamExecutableVersion"
+msgstr "Versiunea Clam AV:"
+
+msgid "plugins.generic.clamav.manager.settings.daemon"
+msgstr "Daemonul ClamAV"
+
+msgid "plugins.generic.clamav.manager.settings.daemon.description"
+msgstr "Dacă demonul clamd este disponibil în sistemul dvs., îl puteți utiliza pentru a scana fișierele încărcate în locul executabilului clamscan. Spre deosebire de clamscan, daemonul clamd păstrează definițiile de virus în memorie între scanări, reducând astfel latența."
+
+msgid "plugins.generic.clamav.manager.settings.clamavUseSocket"
+msgstr "Vă conectați în schimb la daemonul Clam AV?"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketPath"
+msgstr "Ruta sistemului către socket-ul clamd.sock al Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamSocketVersion"
+msgstr "Versiunea Clam AV:"
+
+msgid "plugins.generic.clamav.manager.settings.advanced"
+msgstr "Setări avansate"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout"
+msgstr "Timeout"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout.units"
+msgstr "secunde"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles"
+msgstr "Permiteți sau blocați fișierele nescanate?"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow"
+msgstr "Permiteți fișierele nescanate"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.block"
+msgstr "Blocați fișierele nescanate"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"
+msgstr "Dacă o scanare a unui fișier durează mai mult decât setarea timeout sau dacă apare o eroare în timpul procesului de scanare, scanarea nu se va finaliza. Modul în care pluginul tratează aceste \"fișiere nescanate\" este determinat de cea de-a doua setare. Permiterea acestor fișiere nescanate înseamnă că fișierele care nu pot fi scanate la timp vor fi încărcate cu succes; blocarea fișierelor nescanate înseamnă că fișierele care nu pot fi scanate vor fi blocate și nu vor putea fi încărcate. Blocarea fișierelor atunci când acestea nu pot fi scanate este mai sigură, dar poate cauza probleme pentru utilizatorii legitimi."
