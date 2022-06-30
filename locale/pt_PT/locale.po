@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Cristina Bleorțu, Martin Brändle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-11-12T10:24:49-05:00\n"
+"PO-Revision-Date: 2022-06-15T15:46:49+01:00\n"
+"Language: pt_PT\n"
+
+msgid "plugins.generic.clamav.displayName"
+msgstr "Clam Antivirus"
+
+msgid "plugins.generic.clamav.description"
+msgstr "Integrar OJS com a ClamAV para ficheiros de submissão carregados.  Através deste plugin, OJS pode verificar cada ficheiro de submissão no momento do carregamento, e rejeitará os ficheiros que tenham assinaturas de vírus conhecidas pela ClamAV."
+
+msgid "plugins.generic.clamav.uploadBlocked"
+msgstr "O Clam Antivirus bloqueou este ficheiro devido à assinatura do vírus \"{$threatname}\"."
+
+msgid "plugins.generic.clamav.error"
+msgstr "O Clam Antivirus não foi capaz de completar o scan deste ficheiro."
+
+msgid "plugins.generic.clamav.manager.clamavSettings"
+msgstr "Configurações do Clam AV"
+
+msgid "plugins.generic.clamav.manager.settings.description"
+msgstr "<p>Por favor, forneça detalhes sobre como executar a Clam AV no seu sistema. Deverá ter o  <a href=\"https://www.clamav.net/\">Clam AV</a> instalado.</p>"
+
+msgid "plugins.generic.clamav.manager.settings.clamavPath"
+msgstr "É necessário o caminho do sistema para o ficheiro executável Clamscan da Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamavPathRequired"
+msgstr "É necessário o caminho do sistema para o ficheiro executável Clamscan da Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.test"
+msgstr "Test"
+
+msgid "plugins.generic.clamav.manager.settings.version"
+msgstr "Versão Clam AV detectada"
+
+msgid "plugins.generic.clamav.manager.settings.noversion"
+msgstr "Versão Clam AV não encontrada."
+
+msgid "plugins.generic.clamav.manager.settings.networkProblem"
+msgstr "Problema de ligação ao servidor."
+
+msgid "plugins.generic.clamav.manager.settings.clamExecutableVersion"
+msgstr "Versão Clam AV:"
+
+msgid "plugins.generic.clamav.manager.settings.daemon"
+msgstr "Daemon ClamAV"
+
+msgid "plugins.generic.clamav.manager.settings.daemon.description"
+msgstr "Se o daemon clamd estiver disponível no seu sistema, pode utilizá-lo para verificar os ficheiros carregados em vez do executável clamscan. Ao contrário do clamscan, o daemon clamd mantém as suas definições de vírus na memória entre scans, o que reduz a latência."
+
+msgid "plugins.generic.clamav.manager.settings.clamavUseSocket"
+msgstr "Ligar ao daemon Clam AV em vez disso?"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketPath"
+msgstr "O caminho do sistema para a socket clamd.sock da Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamSocketVersion"
+msgstr "Versão Clam AV:"
+
+msgid "plugins.generic.clamav.manager.settings.advanced"
+msgstr "Configurações avançadas"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout"
+msgstr "Timeout."
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout.units"
+msgstr "segundos"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles"
+msgstr "Permitir ou bloquear ficheiros não verificados?"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow"
+msgstr "Permitir ficheiros não verificados"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.block"
+msgstr "Bloquear ficheiros não verificados "
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"
+msgstr "Se o scan de um ficheiro demorar mais tempo do que o tempo limite definido ou se ocorrer um erro durante o processo de scan, o scan não será concluído. A forma como o plugin lida com estes "ficheiros não verificados" é determinada pela segunda configuração. Permitir estes ficheiros não verificados significa que os ficheiros que não podem ser verificados a tempo serão carregados com sucesso; bloquear ficheiros não verificados significa que os ficheiros que não puderem ser verificados serão bloqueados e não poderão ser carregados. O bloqueamento de ficheiros que não puderem ser verificados é mais seguro, mas pode causar problemas aos utilizadores legítimos."

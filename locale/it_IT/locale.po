@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Martin Brändle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-11-12T10:24:49-05:00\n"
+"PO-Revision-Date: 2022-06-15T15:20:49+01:00\n"
+"Language: it_IT\n"
+
+msgid "plugins.generic.clamav.displayName"
+msgstr "Clam Antivirus"
+
+msgid "plugins.generic.clamav.description"
+msgstr "Integrare OJS con ClamAV per i file di presentazione caricati.  Tramite questo plugin, OJS può eseguire la scansione di ogni file di presentazione al momento del caricamento e rifiutare i file che presentano firme di virus note a ClamAV."
+
+msgid "plugins.generic.clamav.uploadBlocked"
+msgstr "Clam Antivirus ha bloccato questo file a causa della firma del virus \"{$threatname}\"."
+
+msgid "plugins.generic.clamav.error"
+msgstr "Clam Antivirus non è riuscito a completare la scansione di questo file."
+
+msgid "plugins.generic.clamav.manager.clamavSettings"
+msgstr "Impostazioni di Clam AV"
+
+msgid "plugins.generic.clamav.manager.settings.description"
+msgstr "<p>Fornire informazioni dettagliate su come eseguire Clam AV sul sistema. È necessario che <a href=\"https://www.clamav.net/\">Clam AV</a> sia già installato.</p>"
+
+msgid "plugins.generic.clamav.manager.settings.clamavPath"
+msgstr "Il percorso di sistema dell'eseguibile clamscan di Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamavPathRequired"
+msgstr "È richiesto il percorso di sistema dell'eseguibile clamscan di Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.test"
+msgstr "Test"
+
+msgid "plugins.generic.clamav.manager.settings.version"
+msgstr "Versione di Clam AV rilevata"
+
+msgid "plugins.generic.clamav.manager.settings.noversion"
+msgstr "Versione di Clam AV non trovata."
+
+msgid "plugins.generic.clamav.manager.settings.networkProblem"
+msgstr "Problema di connessione al server."
+
+msgid "plugins.generic.clamav.manager.settings.clamExecutableVersion"
+msgstr "Versione di Clam AV:"
+
+msgid "plugins.generic.clamav.manager.settings.daemon"
+msgstr "Demone ClamAV"
+
+msgid "plugins.generic.clamav.manager.settings.daemon.description"
+msgstr "Se il demone clamd è disponibile sul sistema, è possibile utilizzarlo per la scansione dei file caricati al posto dell'eseguibile clamscan. A differenza di clamscan, il demone clamd mantiene in memoria le definizioni dei virus tra una scansione e l'altra, riducendo la latenza."
+
+msgid "plugins.generic.clamav.manager.settings.clamavUseSocket"
+msgstr "Collegarsi invece al demone Clam AV?"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketPath"
+msgstr "Il percorso di sistema del socket clamd.sock di Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamSocketVersion"
+msgstr "Versione di Clam AV:"
+
+msgid "plugins.generic.clamav.manager.settings.advanced"
+msgstr "Impostazioni avanzate"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout"
+msgstr "Timeout."
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout.units"
+msgstr "secondi"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles"
+msgstr "Consentire o bloccare i file non scansionati?"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow"
+msgstr "Consentire i file non scansionati"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.block"
+msgstr "Bloccare i file non scansionati"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"
+msgstr "Se la scansione di un file dura più a lungo del timeout impostato o se si verifica un errore durante il processo di scansione, la scansione non viene completata. Il modo in cui il plugin tratta questi \"file non scansionati\" è determinato dalla seconda impostazione. Consentire questi file non scansionati significa che i file che non possono essere scansionati in tempo saranno caricati con successo; bloccare i file non scansionati significa che i file che non possono essere scansionati saranno bloccati e non potranno essere caricati. Bloccare i file che non possono essere scansionati è più sicuro, ma può causare problemi agli utenti legittimi."

@@ -1,0 +1,88 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Martin Brändle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-11-12T10:24:49-05:00\n"
+"PO-Revision-Date: 2022-06-15T12:36:49+01:00\n"
+"Language: fr_FR\n"
+
+msgid "plugins.generic.clamav.displayName"
+msgstr "Clam Antivirus"
+
+msgid "plugins.generic.clamav.description"
+msgstr "Intégrer OJS à ClamAV pour les fichiers de soumission téléchargés.  Grâce à ce module, OJS peut analyser chaque fichier de soumission au moment du téléchargement et rejeter les fichiers dont la signature virale est connue de ClamAV."
+
+msgid "plugins.generic.clamav.uploadBlocked"
+msgstr "Clam Antivirus a bloqué ce fichier en raison de la signature du virus \"{$threatname}\"."
+
+msgid "plugins.generic.clamav.error"
+msgstr "Clam Antivirus n'a pas pu terminer l'analyse de ce fichier."
+
+msgid "plugins.generic.clamav.manager.clamavSettings"
+msgstr "Paramètres de ClamAV"
+
+msgid "plugins.generic.clamav.manager.settings.description"
+msgstr "<p>Veuillez fournir des détails sur la façon d'exécuter Clam AV sur votre système.  Vous devez déjà avoir installé <a href=\"https://www.clamav.net/\">Clam AV</a>.</p>"
+
+msgid "plugins.generic.clamav.manager.settings.clamavPath"
+msgstr "Le chemin d'accès système à l'exécutable clamscan de Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamavPathRequired"
+msgstr "Le chemin d'accès au système de l'exécutable clamscan de Clam AV est requis."
+
+msgid "plugins.generic.clamav.manager.settings.test"
+msgstr "Test"
+
+msgid "plugins.generic.clamav.manager.settings.version"
+msgstr "Version de Clam AV détectée"
+
+msgid "plugins.generic.clamav.manager.settings.noversion"
+msgstr "Clam AV version non trouvée."
+
+msgid "plugins.generic.clamav.manager.settings.networkProblem"
+msgstr "Problème de connexion au serveur."
+
+msgid "plugins.generic.clamav.manager.settings.clamExecutableVersion"
+msgstr "Version Clam AV :"
+
+msgid "plugins.generic.clamav.manager.settings.daemon"
+msgstr "Daemon Clam AV"
+
+msgid "plugins.generic.clamav.manager.settings.daemon.description"
+msgstr "Si le daemon clamd est disponible sur votre système, vous pouvez l'utiliser pour analyser les fichiers téléchargés à la place de l'exécutable clamscan. Contrairement à clamscan, le daemon clamd conserve ses définitions de virus en mémoire entre les analyses, ce qui réduit la latence."
+
+msgid "plugins.generic.clamav.manager.settings.clamavUseSocket"
+msgstr "Se connecter au daemon Clam AV à la place ?"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketPath"
+msgstr "Le chemin d'accès système au socket clamd.sock de Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamSocketVersion"
+msgstr "Version Clam AV :"
+
+msgid "plugins.generic.clamav.manager.settings.advanced"
+msgstr "Paramètres avancés"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout"
+msgstr "Délai d'attente."
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout.units"
+msgstr "secondes"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles"
+msgstr "Autoriser ou bloquer les fichiers non scannés ?"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow"
+msgstr "Autoriser les fichiers non scannés"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.block"
+msgstr "Bloquer les fichiers non scannés"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"
+msgstr "Si l'analyse d'un fichier prend plus de temps que le paramètre de délai d'attente ou si une erreur survient au cours du processus d'analyse, l'analyse ne sera pas terminée. La façon dont le plugin traite ces \"fichiers non analysés\" est déterminée par le deuxième paramètre. Autoriser ces fichiers non analysés signifie que les fichiers qui ne peuvent pas être analysés à temps seront téléchargés avec succès ; bloquer les fichiers non analysés signifie que les fichiers qui ne peuvent pas être analysés seront bloqués et ne pourront pas être téléchargés. Le blocage des fichiers qui ne peuvent pas être analysés est plus sûr, mais peut causer des problèmes aux utilisateurs légitimes."
+

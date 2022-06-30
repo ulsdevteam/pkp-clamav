@@ -1,0 +1,88 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Martin Braendle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-11-12T10:24:49-05:00\n"
+"PO-Revision-Date: 2022-06-15T11:11:49+01:00\n"
+"Language: de_DE\n"
+
+msgid "plugins.generic.clamav.displayName"
+msgstr "Clam Antivirus"
+
+msgid "plugins.generic.clamav.description"
+msgstr "Integration von OJS mit ClamAV für hochgeladene Einreichungsdateien. Mit diesem Plugin kann OJS jede Einreichungsdatei während des Uploads scannen und Dateien ablehnen, die ClamAV bekannte Virussignaturen aufweisen."
+
+msgid "plugins.generic.clamav.uploadBlocked"
+msgstr "Clam Antivirus blockierte diese Datei aufgrund der Virussignatur \"{$threatname}\"."
+
+msgid "plugins.generic.clamav.error"
+msgstr "Clam Antivirus war nicht in der Lage, die Überprüfung dieser Datei abzuschliessen."
+
+msgid "plugins.generic.clamav.manager.clamavSettings"
+msgstr "Clam AV Einstellungen"
+
+msgid "plugins.generic.clamav.manager.settings.description"
+msgstr "<p>Bitte geben Sie an, wie Sie Clam AV auf Ihrem System ausführen. Sie müssen <a href=\"https://www.clamav.net/\">Clam AV</a> bereits installiert haben.</p>"
+
+msgid "plugins.generic.clamav.manager.settings.clamavPath"
+msgstr "Der Systempfad zur ausführbaren Datei clamscan von Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamavPathRequired"
+msgstr "Der Systempfad zur ausführbaren Datei clamscan von Clam AV ist erforderlich."
+
+msgid "plugins.generic.clamav.manager.settings.test"
+msgstr "Test"
+
+msgid "plugins.generic.clamav.manager.settings.version"
+msgstr "Clam AV Version erkannt"
+
+msgid "plugins.generic.clamav.manager.settings.noversion"
+msgstr "Clam AV Version nicht gefunden."
+
+msgid "plugins.generic.clamav.manager.settings.networkProblem"
+msgstr "Problem bei der Verbindung zum Server."
+
+msgid "plugins.generic.clamav.manager.settings.clamExecutableVersion"
+msgstr "Clam AV Version:"
+
+msgid "plugins.generic.clamav.manager.settings.daemon"
+msgstr "ClamAV Daemon"
+
+msgid "plugins.generic.clamav.manager.settings.daemon.description"
+msgstr "Wenn der clamd-Daemon auf Ihrem System verfügbar ist, können Sie ihn zum Scannen hochgeladener Dateien anstelle der ausführbaren Datei clamscan verwenden. Im Gegensatz zu clamscan behält der clamd-Daemon seine Virendefinitionen zwischen den Überprüfungen im Speicher, was die Latenzzeit verringert."
+
+msgid "plugins.generic.clamav.manager.settings.clamavUseSocket"
+msgstr "Stattdessen mit dem Clam AV-Daemon verbinden?"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketPath"
+msgstr "Der Systempfad zum Socket clamd.sock von Clam AV."
+
+msgid "plugins.generic.clamav.manager.settings.clamSocketVersion"
+msgstr "Clam AV Version:"
+
+msgid "plugins.generic.clamav.manager.settings.advanced"
+msgstr "Erweiterte Einstellungen"
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout"
+msgstr "Zeitüberschreitung."
+
+msgid "plugins.generic.clamav.manager.settings.clamavSocketTimeout.units"
+msgstr "Sekunden"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles"
+msgstr "Nicht gescannte Dateien zulassen oder blockieren?"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.allow"
+msgstr "Nicht gescannte Dateien zulassen"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.block"
+msgstr "Nicht gescannte Dateien blockieren"
+
+msgid "plugins.generic.clamav.manager.settings.allowUnscannedFiles.detail"
+msgstr "Wenn die Überprüfung einer Datei länger dauert als die eingestellte Zeitüberschreitung oder ein Fehler während des Überprüfungsvorgangs auftritt, wird die Überprüfung nicht abgeschlossen. Wie das Plugin mit diesen \"nicht gescannten Dateien\" umgeht, wird durch die zweite Einstellung bestimmt. Das Zulassen dieser nicht gescannten Dateien bedeutet, dass Dateien, die nicht rechtzeitig gescannt werden können, erfolgreich hochgeladen werden; das Blockieren von nicht gescannten Dateien bedeutet, dass Dateien, die nicht gescannt werden können, blockiert werden und nicht hochgeladen werden können. Das Blockieren von Dateien, die nicht gescannt werden können, ist sicherer, kann aber Probleme für legitime Benutzer verursachen."
+
