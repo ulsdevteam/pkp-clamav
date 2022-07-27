@@ -208,9 +208,10 @@ class ClamavPlugin extends GenericPlugin {
 					return $virusID;
 				//failed to scan
 				case 2:
-					throw new ClamScanFailureException("ClamAV failed to scan the file");
+				default:
 			}
 		}
+		throw new ClamScanFailureException("ClamAV failed to scan the file");
 	}
 
 	/**
@@ -277,6 +278,7 @@ class ClamavPlugin extends GenericPlugin {
 				return $output['message'];
 			}
 		}
+		throw new ClamScanFailureException("ClamAV Daemon failed to scan the file");
 	}
 
 	/**
@@ -352,7 +354,7 @@ class ClamavPlugin extends GenericPlugin {
 			}
 			//Scanning errors will generate a custom exception
 			catch (ClamScanFailureException $e){
-					//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
+				//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
 				$setting=$this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles');
 				if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===self::UNSCANNED_ALLOW) {
 					return false;
@@ -367,12 +369,10 @@ class ClamavPlugin extends GenericPlugin {
 			$errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(SCHEMA_SUBMISSION_FILE), $allowedLocales);
 	
 			if ($args[0]===null){
-					$args[0]=$errors;
+				$args[0]=$errors;
 			} elseif (is_array($args[0])) {
 				array_push($args[0],$errors);
 			}
-			//Clean up rejected file
-			Services::get('file')->delete($fileId);
 			// returning true aborts processing
 			return true;
 			
