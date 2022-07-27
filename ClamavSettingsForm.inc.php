@@ -46,8 +46,9 @@ class ClamavSettingsForm extends Form {
 	/**
 	 * Initialize form data.
 	 */
-	function initData($request) {
+	function initData() {
 		$plugin = $this->_plugin;
+		$request = Application::getRequest();
 		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
 		import('classes.core.PageRouter');
 		$pgRouter = new PageRouter();
@@ -79,7 +80,7 @@ class ClamavSettingsForm extends Form {
 	 * Fetch the form.
 	 * @copydoc Form::fetch()
 	 */
-	function fetch($request) {
+	function fetch($request, $template = NULL, $display = false) {
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('pluginName', $this->_plugin->getName());
 
@@ -95,7 +96,7 @@ class ClamavSettingsForm extends Form {
 	/**
 	 * Save settings.
 	 */
-	function execute() {
+	function execute(...$functionArgs) {
 		// set defaults if we have them. Not using built-in validation because
 		// these fields aren't mandatory.
 		$clamavSocketTimeout = $this->getData('clamavSocketTimeout');
