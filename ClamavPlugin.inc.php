@@ -388,7 +388,8 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	public function setPageHandler($hookName, $params) {
 		$page = $params[0];
-		if ($this->getEnabled() && $page === 'clamavVersion') {
+		$op = $params[1];
+		if ($this->getEnabled() && $page === 'clamav' && $op === 'clamavVersion') {
 			$this->import('ClamavVersionHandler');
 			define('HANDLER_CLASS', 'ClamavVersionHandler');
 			return true;
