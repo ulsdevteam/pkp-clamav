@@ -93,7 +93,7 @@
 		}
 		
 		// This builds the request URL
-		var url = $("#clamavSettingsForm").data('ajax-href') + "/get?path=" + encodeURIComponent(clamavPath) + "&type=" + clamAv['type'];
+		var url = $("#clamavSettingsForm").data('ajax-href') + "?path=" + encodeURIComponent(clamavPath) + "&type=" + clamAv['type'];
 		// Indicates to the user that we are starting to load data
 		$("#"+clamAv['container']).removeClass("valid invalid").addClass("loading");
 

@@ -27,13 +27,17 @@ class ClamavVersionHandler extends Handler {
 	 * @param $request PKPRequest
 	 * @return null|JSONMessage
 	 */
-	public function get($args, $request) {
+	public function clamavVersion($args, $request) {
 		if(Validation::isSiteAdmin()) {
 			$plugin = PluginRegistry::getPlugin('generic', 'clamavplugin');
 			$userVars = $request->getUserVars();
 			$path = $userVars['path'];
 			$type = $userVars['type'];
-			$clamVersion = $plugin->getClamVersion($path, $type);
+			if ($path && $type) {
+				$clamVersion = $plugin->getClamVersion($path, $type);
+			} else {
+				$clamVersion = '';
+			}
 			return new JSONMessage(true, $clamVersion);
 		}
 	}
