@@ -17,7 +17,14 @@
  * @brief Handle router requests for the clam AV version for the clam AV plugin.
  */
 
-import('classes.handler.Handler');
+//import('classes.handler.Handler');
+namespace APP\plugins\generic\clamav;
+
+use PKP\core\JSONMessage;
+use PKP\security\Validation;
+use PKP\plugins\PluginRegistry;
+use APP\template\TemplateManager;
+use APP\handler\Handler;
 
 class ClamavVersionHandler extends Handler {
 	/**

@@ -49,7 +49,7 @@
 
 #clamscanSettingsFormArea #clamavExecutableArea.valid::before, #clamdSettingsFormArea #clamdSocketArea.valid::before {
 	background-color: green;
-	content: "\2713"; /* checkbox. Remember that CSS uses different entities than HTML. */
+	content: "\2713";  /* checkbox. Remember that CSS uses different entities than HTML. */
 }
 
 #clamscanSettingsFormArea #clamavExecutableArea.invalid::before, #clamdSettingsFormArea #clamdSocketArea.invalid::before {
@@ -63,9 +63,9 @@
 	content: "";
 }
 
-#clamdSocketAdvanced div.full_description {
+/*#clamdSocketAdvanced div.full_description {
 	
-}
+}*/
 
 #clamdSocketAdvancedSettings > div.pkp_helpers_quarter.inline {
 	/* 

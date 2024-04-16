@@ -11,7 +11,26 @@
  *
  * @brief ClamAV plugin class
  */
-import('lib.pkp.classes.plugins.GenericPlugin');
+//import('lib.pkp.classes.plugins.GenericPlugin');
+namespace APP\plugins\generic\clamav;
+
+use PKP\plugins\GenericPlugin;
+use PKP\config\Config;
+use PKP\plugins\Hook;
+use PKP\linkAction\LinkAction;
+use PKP\linkAction\request\AjaxModal;
+use PKP\core\JSONMessage;
+use PKP\validation\ValidatorFactory;
+use PKP\core\PKPApplication;
+use PKP\services\PKPSchemaService;
+use Exception; //check this
+use APP\core\Request;
+use APP\core\Services;
+use APP\core\Application;
+use APP\plugins\generic\clamav\ClamavSettingsForm as ClamavSettingsForm;
+use APP\plugins\generic\clamav\ClamavVersionHandler as ClamavVersionHandler;
+use APP\template\TemplateManager;
+
 class ClamScanFailureException extends Exception {};
 
 class ClamavPlugin extends GenericPlugin {
@@ -34,9 +53,9 @@ class ClamavPlugin extends GenericPlugin {
 			return true;
 		if ($success && $this->getEnabled()) {
 			// Enable Clam AV's preprocessing of uploaded files
-			HookRegistry::register('SubmissionFile::validate', array($this, 'clamscanHandleUpload'));
+			Hook::add('SubmissionFile::validate', array($this, 'clamscanHandleUpload'));
 			// Create handler for AJAX call
-			HookRegistry::register('LoadHandler', array($this, 'setPageHandler'));
+			Hook::add('LoadHandler', array($this, 'setPageHandler'));
 		}
 		return $success;
 	}
@@ -72,14 +91,14 @@ class ClamavPlugin extends GenericPlugin {
 	 * @return 
 	 */
 	function _getBackwardsCompatibleContext() {
-		if(method_exists('Application', 'get')) {
+		//if(method_exists('Application', 'get')) {
 			// OJS 3.2 and later
 			$request = Application::get()->getRequest();
 			$context = $request->getContext();
-		} else {
+		//} else {
 			// OJS 3.1.2 and earlier
-			$context = Request::getContext();
-		}
+			//$context = Request::getContext();
+		//}
 		return $context;
 	}
 
@@ -88,7 +107,7 @@ class ClamavPlugin extends GenericPlugin {
 	 */
 	function getActions($request, $verb) {
 		$router = $request->getRouter();
-		import('lib.pkp.classes.linkAction.request.AjaxModal');
+		//import('lib.pkp.classes.linkAction.request.AjaxModal');
 		return array_merge(
 				$this->getEnabled() ? array(
 			new LinkAction(
@@ -106,14 +125,14 @@ class ClamavPlugin extends GenericPlugin {
 	function manage($args, $request) {
 		switch ($request->getUserVar('verb')) {
 			case 'settings':
-				$contextID = (!is_null($this->_getBackwardsCompatibleContext()) ? $this->_getBackwardsCompatibleContext()->getId() : CONTEXT_SITE);
+				$contextID = (!is_null($this->_getBackwardsCompatibleContext()) ? $this->_getBackwardsCompatibleContext()->getId() : PKPApplication::CONTEXT_SITE);
 
-				AppLocale::requireComponents(LOCALE_COMPONENT_APP_COMMON, LOCALE_COMPONENT_PKP_MANAGER);
+				//AppLocale::requireComponents(LOCALE_COMPONENT_APP_COMMON, LOCALE_COMPONENT_PKP_MANAGER);
 				$templateMgr = TemplateManager::getManager($request);
 				
-				$templateMgr->register_function('plugin_url', array($this, 'smartyPluginUrl'));
+				$templateMgr->registerPlugin('function','plugin_url', array($this, 'smartyPluginUrl'));
 
-				$this->import('ClamavSettingsForm');
+				//$this->import('ClamavSettingsForm');
 				$form = new ClamavSettingsForm($this, $contextID);
 				
 				if ($request->getUserVar('save')) {
@@ -138,13 +157,13 @@ class ClamavPlugin extends GenericPlugin {
 	 * @copydoc PKPPlugin::getTemplatePath
 	 */
 	function getTemplatePath($inCore = false) {
-		if(method_exists($this, 'getTemplateResource')) {
+		//if(method_exists($this, 'getTemplateResource')) {
 			// OJS 3.1.2 and later
 			return parent::getTemplatePath($inCore);
-		} else {
-			// OJS 3.1.1 and earlier 3.x releases
-			return parent::getTemplatePath($inCore) . 'templates' . DIRECTORY_SEPARATOR;
-		}
+		// } else {
+		// 	// OJS 3.1.1 and earlier 3.x releases
+		// 	return parent::getTemplatePath($inCore) . 'templates' . DIRECTORY_SEPARATOR;
+		// }
 	}
 
 	/**
@@ -155,7 +174,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * */
 	function getClamVersion($path = '', $type=self::TYPE_EXECUTABLE) {
 		if ($path === '') {
-			$path = $this->getSetting(CONTEXT_SITE, 'clamavPath');
+			$path = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavPath');
 		}
 		if ($type === self::TYPE_EXECUTABLE && !empty($path) && is_executable($path)) {
 			$version = exec($path . ' --version');
@@ -194,7 +213,7 @@ class ClamavPlugin extends GenericPlugin {
 		if ($this->getClamVersion() && !empty($uploadedFile)) {
 			$output = "";
 			$exitCode = "";
-			$clamAVPath = $this->getSetting(CONTEXT_SITE, 'clamavPath');
+			$clamAVPath = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavPath');
 			$scan = exec($clamAVPath . ' --no-summary -i ' . $uploadedFile, $output, $exitCode);
 			//process the result
 			preg_match('/:(.*)/',$output[0],$matches);
@@ -220,7 +239,7 @@ class ClamavPlugin extends GenericPlugin {
 	 * @return boolean|string
 	 */
 	function _clamDaemonFile($uploadedFile) {
-		$clamavSocketPath = $this->getSetting(CONTEXT_SITE, 'clamavSocketPath');
+		$clamavSocketPath = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketPath');
 		$maxInstreamSize = 1024; // TODO: need to universalize this based on a plugin setting
 		$output = "";
 		$errno = 0;
@@ -292,8 +311,8 @@ class ClamavPlugin extends GenericPlugin {
 	function _clamDaemonShortPolling($socket, $delay = 100000000, $intervals = 10) {
 		// author's note: cludge cludge cludge cludge. TODO: look into long polling for unix sockets?
 		$output = "";
-		$intervals = $this->getSetting(CONTEXT_SITE, 'clamavSocketTimeout')*10;
-		$failover = $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles');
+		$intervals = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketTimeout')*10;
+		$failover = $this->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles');
 		
 		for ($i = 0; $i < $intervals; $i++) {
 			// sleep() does not accept fractional seconds and usleep uses a surprising amount of CPU, leaving us with time_nanosleep().
@@ -323,13 +342,13 @@ class ClamavPlugin extends GenericPlugin {
 		$uploadedFile = Config::getVar('files', 'files_dir') . '/' . $path;
 		//scan for viruses if file exists
 		if (null !== $file) {
-			$useSocket = $this->getSetting(CONTEXT_SITE, 'clamavUseSocket');
-			import('lib.pkp.classes.validation.ValidatorFactory');
+			$useSocket = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavUseSocket');
+			//import('lib.pkp.classes.validation.ValidatorFactory');
 			$schemaService = Services::get('schema');
 			$rejectionMessage = array();
-			$validator = \ValidatorFactory::make(
+			$validator = ValidatorFactory::make(
 				$props,
-				$schemaService->getValidationRules(SCHEMA_SUBMISSION_FILE, $allowedLocales), 
+				$schemaService->getValidationRules(PKPSchemaService::SCHEMA_SUBMISSION_FILE, $allowedLocales), 
 				$rejectionMessage
 			);
 			try {
@@ -355,8 +374,8 @@ class ClamavPlugin extends GenericPlugin {
 			//Scanning errors will generate a custom exception
 			catch (ClamScanFailureException $e){
 				//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
-				$setting=$this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles');
-				if ( $this->getSetting(CONTEXT_SITE, 'allowUnscannedFiles')===self::UNSCANNED_ALLOW) {
+				$setting=$this->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles');
+				if ( $this->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles')===self::UNSCANNED_ALLOW) {
 					return false;
 				} else {
 					//Otherwise notify the user that there was an error
@@ -389,9 +408,10 @@ class ClamavPlugin extends GenericPlugin {
 	public function setPageHandler($hookName, $params) {
 		$page = $params[0];
 		$op = $params[1];
+		$handler = $params[3];
 		if ($this->getEnabled() && $page === 'clamav' && $op === 'clamavVersion') {
-			$this->import('ClamavVersionHandler');
-			define('HANDLER_CLASS', 'ClamavVersionHandler');
+			//$this->import('ClamavVersionHandler');
+			$params[3] = new ClamavVersionHandler();
 			return true;
 		}
 		return false;
