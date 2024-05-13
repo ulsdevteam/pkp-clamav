@@ -48,7 +48,7 @@ class ClamavSettingsForm extends Form {
 	 */
 	function initData() {
 		$plugin = $this->_plugin;
-		$request = Application::getRequest();
+		$request = Application::get()->getRequest();
 		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
 
 		$this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
