@@ -38,15 +38,9 @@ class ClamavSettingsForm extends Form {
 	function __construct($plugin, $contextId) {
 		$this->_contextId = $contextId;
 		$this->_plugin = $plugin;
-
-		if (method_exists($plugin, 'getTemplateResource')) {
-			// OJS 3.1.2 and later
-			parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
-		} else {
-			// OJS 3.1.1 and earlier
-			parent::__construct($plugin->getTemplatePath() . 'settingsForm.tpl');
-		}
-
+		
+		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
+		
 		$this->addCheck(new FormValidator($this, 'clamavPath', FormValidator::FORM_VALIDATOR_OPTIONAL_VALUE, 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
 		$this->addCheck(new FormValidatorPost($this));
 		$this->addCheck(new FormValidatorCSRF($this));
