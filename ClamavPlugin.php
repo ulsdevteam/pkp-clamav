@@ -24,8 +24,8 @@ use PKP\core\PKPApplication;
 use PKP\file\TemporaryFileManager;
 use Exception;
 use APP\core\Application;
-use APP\plugins\generic\clamav\ClamavSettingsForm as ClamavSettingsForm;
-use APP\plugins\generic\clamav\ClamavVersionHandler as ClamavVersionHandler;
+use APP\plugins\generic\clamav\ClamavSettingsForm;
+use APP\plugins\generic\clamav\ClamavVersionHandler;
 use APP\template\TemplateManager;
 
 class ClamScanFailureException extends Exception {};
