@@ -11,7 +11,7 @@
  *
  * @brief Form for the site admin to modify Clam AV plugin settings
  */
-//import('lib.pkp.classes.form.Form');
+
 namespace APP\plugins\generic\clamav;
 
 use PKP\form\Form;

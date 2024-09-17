@@ -17,7 +17,7 @@
  * @brief Handle router requests for the clam AV version for the clam AV plugin.
  */
 
-//import('classes.handler.Handler');
+
 namespace APP\plugins\generic\clamav;
 
 use PKP\core\JSONMessage;
