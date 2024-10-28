@@ -12,8 +12,8 @@
 <version>
 	<application>clamav</application>
 	<type>plugins.generic</type>
-	<release>4.0.0.2</release>
-	<date>2022-10-12</date>
+	<release>4.0.0.3</release>
+	<date>2024-06-10</date>
 	<lazy-load>1</lazy-load>
 	<class>ClamavPlugin</class>
 	<sitewide>1</sitewide>
