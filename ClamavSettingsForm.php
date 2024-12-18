@@ -11,7 +11,16 @@
  *
  * @brief Form for the site admin to modify Clam AV plugin settings
  */
-import('lib.pkp.classes.form.Form');
+
+namespace APP\plugins\generic\clamav;
+
+use PKP\form\Form;
+use PKP\form\validation\FormValidator;
+use PKP\form\validation\FormValidatorPost;
+use PKP\form\validation\FormValidatorCSRF;
+use PKP\core\PKPApplication;
+use APP\core\Application;
+use APP\template\TemplateManager;
 
 class ClamavSettingsForm extends Form {
 
@@ -29,16 +38,10 @@ class ClamavSettingsForm extends Form {
 	function __construct($plugin, $contextId) {
 		$this->_contextId = $contextId;
 		$this->_plugin = $plugin;
-
-		if (method_exists($plugin, 'getTemplateResource')) {
-			// OJS 3.1.2 and later
-			parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
-		} else {
-			// OJS 3.1.1 and earlier
-			parent::__construct($plugin->getTemplatePath() . 'settingsForm.tpl');
-		}
-
-		$this->addCheck(new FormValidator($this, 'clamavPath', FORM_VALIDATOR_OPTIONAL_VALUE, 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
+		
+		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
+		
+		$this->addCheck(new FormValidator($this, 'clamavPath', FormValidator::FORM_VALIDATOR_OPTIONAL_VALUE, 'plugins.generic.clamav.manager.settings.clamavPathRequired'));
 		$this->addCheck(new FormValidatorPost($this));
 		$this->addCheck(new FormValidatorCSRF($this));
 	}
@@ -51,18 +54,18 @@ class ClamavSettingsForm extends Form {
 		$request = Application::get()->getRequest();
 		$basePluginUrl = $request->getBaseUrl() . DIRECTORY_SEPARATOR . $plugin->getPluginPath() . DIRECTORY_SEPARATOR;
 
-		$this->setData('clamavPath', $plugin->getSetting(CONTEXT_SITE, 'clamavPath'));
-		$this->setData('clamavUseSocket', $plugin->getSetting(CONTEXT_SITE, 'clamavUseSocket'));
-		$this->setData('clamavSocketPath', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketPath'));
-		$this->setData('unscannedFileOption', $plugin->getSetting(CONTEXT_SITE, 'allowUnscannedFiles'));
-		$this->setData('clamavSocketTimeout', $plugin->getSetting(CONTEXT_SITE, 'clamavSocketTimeout'));
+		$this->setData('clamavPath', $plugin->getSetting(PKPApplication::CONTEXT_SITE, 'clamavPath'));
+		$this->setData('clamavUseSocket', $plugin->getSetting(PKPApplication::CONTEXT_SITE, 'clamavUseSocket'));
+		$this->setData('clamavSocketPath', $plugin->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketPath'));
+		$this->setData('unscannedFileOption', $plugin->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles'));
+		$this->setData('clamavSocketTimeout', $plugin->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketTimeout'));
 
 
 		$this->setData('pluginJavascriptURL', $basePluginUrl . 'js' . DIRECTORY_SEPARATOR);
 		$this->setData('pluginStylesheetURL', $basePluginUrl . 'css' . DIRECTORY_SEPARATOR);
 		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
 		$this->setData('pluginLoadingImageURL', $basePluginUrl . 'images' . DIRECTORY_SEPARATOR . "spinner.gif");
-		$this->setData('pluginAjaxUrl', $request->getDispatcher()->url($request, ROUTE_PAGE, null, 'clamav', 'clamavVersion'));
+		$this->setData('pluginAjaxUrl', $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, null, 'clamav', 'clamavVersion'));
 
 		$this->setData('baseUrl', $request->getBaseUrl());
 	}
@@ -106,11 +109,11 @@ class ClamavSettingsForm extends Form {
 			$allowUnscannedFiles = $this->_plugin::UNSCANNED_DEFAULT;
 		}
 
-		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavPath', $this->getData('clamavPath'), 'string');
-		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavUseSocket', $this->getData('clamavUseSocket'), 'bool');
-		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavSocketPath', $this->getData('clamavSocketPath'), 'string');
-		$this->_plugin->updateSetting(CONTEXT_SITE, 'clamavSocketTimeout', $clamavSocketTimeout, 'int');
-		$this->_plugin->updateSetting(CONTEXT_SITE, 'allowUnscannedFiles', $allowUnscannedFiles, 'string');
+		$this->_plugin->updateSetting(PKPApplication::CONTEXT_SITE, 'clamavPath', $this->getData('clamavPath'), 'string');
+		$this->_plugin->updateSetting(PKPApplication::CONTEXT_SITE, 'clamavUseSocket', $this->getData('clamavUseSocket'), 'bool');
+		$this->_plugin->updateSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketPath', $this->getData('clamavSocketPath'), 'string');
+		$this->_plugin->updateSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketTimeout', $clamavSocketTimeout, 'int');
+		$this->_plugin->updateSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles', $allowUnscannedFiles, 'string');
 	}
 
 	/**

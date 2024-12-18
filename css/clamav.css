@@ -63,10 +63,6 @@
 	content: "";
 }
 
-#clamdSocketAdvanced div.full_description {
-	
-}
-
 #clamdSocketAdvancedSettings > div.pkp_helpers_quarter.inline {
 	/* 
 	 * sets this as a containing block, against which other absolutely-
