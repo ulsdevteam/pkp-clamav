@@ -81,17 +81,6 @@ class ClamavPlugin extends GenericPlugin {
 	function isSitePlugin() {
 		return true;
 	}
-	
-	/**
-	 * Backwards-compatible method to retrieve the current context across
-	 * multiple versions of PKP applicatiosn
-	 * @return 
-	 */
-	function _getBackwardsCompatibleContext() {
-		$request = Application::get()->getRequest();
-		$context = $request->getContext();
-		return $context;
-	}
 
 	/**
 	 * @copydoc Plugin::getActions()
@@ -115,7 +104,8 @@ class ClamavPlugin extends GenericPlugin {
 	function manage($args, $request) {
 		switch ($request->getUserVar('verb')) {
 			case 'settings':
-				$contextID = (!is_null($this->_getBackwardsCompatibleContext()) ? $this->_getBackwardsCompatibleContext()->getId() : PKPApplication::CONTEXT_SITE);
+				$context = Application::get()->getRequest()->getContext();
+				$contextID = $context->getId();
 
 				$templateMgr = TemplateManager::getManager($request);
 				
