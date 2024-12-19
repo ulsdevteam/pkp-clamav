@@ -105,7 +105,7 @@ class ClamavPlugin extends GenericPlugin {
 		switch ($request->getUserVar('verb')) {
 			case 'settings':
 				$context = Application::get()->getRequest()->getContext();
-				$contextID = $context->getId();
+				$contextID = (!is_null($context)) ? $context->getId() : PKPApplication::CONTEXT_SITE;
 
 				$templateMgr = TemplateManager::getManager($request);
 				
