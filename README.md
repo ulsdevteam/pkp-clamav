@@ -4,8 +4,8 @@ This plugin scans submission files using [Clam Antivirus](https://www.clamav.net
 
 ## Requirements
 
-* OJS 3.3 or later
-* PHP7
+* OJS 3.4 or later
+* PHP8
 * Clam Antivirus
   * To run clamscan or clamdscan
     * You must be able to execute `clamdscan --version` with output text indicating the ClamAV version
@@ -34,6 +34,6 @@ When uploading a submission file through the Author Submission Steps, or via the
 
 ## Author / License
 
-Written by Clinton Graham and Alex Wreschnig and Rick Hoover for the [University of Pittsburgh](http://www.pitt.edu).  Copyright (c) University of Pittsburgh.
+Written by Clinton Graham and Alex Wreschnig and Rick Hoover and Tazio Polanco for the [University of Pittsburgh](http://www.pitt.edu).  Copyright (c) University of Pittsburgh.
 
 Released under a license of GPL v2 or later.
