@@ -123,7 +123,11 @@ class ClamavSettingsForm extends Form {
 	 */
 	function displayVersion($path) {
 		$plugin = $this->_plugin;
-		$version = $plugin->getClamVersion($path);
+		$useSocket = $plugin->getSetting(\PKP\core\PKPApplication::CONTEXT_SITE, 'clamavUseSocket');
+		$type = $useSocket
+			? \APP\plugins\generic\clamav\ClamavPlugin::TYPE_SOCKET
+			: \APP\plugins\generic\clamav\ClamavPlugin::TYPE_EXECUTABLE;
+		$version = $plugin->getClamVersion($path, $type);
 		if ($version === '') {
 			$version = __('plugins.generic.clamav.manager.settings.noversion');
 		}
