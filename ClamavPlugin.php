@@ -153,8 +153,8 @@ class ClamavPlugin extends GenericPlugin {
 		}
 		if ($type === self::TYPE_EXECUTABLE && !empty($path) && is_executable($path)) {
 			$version = exec($path . ' --version');
-			if (preg_match('/^ClamAV .*/', $version)) {
-				return $version;
+			if (preg_match('/^ClamAV (.+)/', $version, $matches)) {
+				return $matches[1];
 			}
 		} else if ($type === self::TYPE_SOCKET && !empty($path)) {
 			$output = '';
@@ -170,13 +170,8 @@ class ClamavPlugin extends GenericPlugin {
 				// get version of clamd
 				// \0 is null character.
 				stream_socket_sendto($clamDaemon, "zVERSION\0");
-				usleep(300000);
-				$output = stream_get_contents($clamDaemon);
-				$output = rtrim($output, "\0");
-				if (preg_match('/^ClamAV /', $output)) {
-					return $output;
-				}
-				return '';
+				$output = $this->_clamDaemonShortPolling($clamDaemon);
+				return $output['message'];
 			}
 
 		}
