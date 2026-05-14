@@ -309,11 +309,17 @@ class ClamavPlugin extends GenericPlugin {
 	/**
 	 * Hook callback: scan an uploaded file with ClamAV
 	 * @see SubmissionFile::validate
+	 * @param string $hookName
+	 * @param array $args [&$errors, $object, $props, $allowedLocales, $submissionLocale]
+	 *   - $errors array passed by reference; add key/value pairs to block file submission
+	 *   - $object ?SubmissionFile existing file object if editing, null for new uploads
+	 *   - $props array new/updated properties including fileId
 	 */
+
 	function clamscanHandleUpload($hookName, $args) {
 		$errors =& $args[0];
 		$props  = $args[2];
-
+                //scan for viruses if file exists
 		$fileId = $props['fileId'] ?? null;
 		if (!$fileId) {
 			return false;
@@ -330,7 +336,7 @@ class ClamavPlugin extends GenericPlugin {
 		if (!file_exists($absolutePath)) {
 			return false;
 		}
-
+                //If using ClamAV daemon 
 		$useSocket = $this->getSetting(\PKP\core\PKPApplication::CONTEXT_SITE, 'clamavUseSocket');
 
 		try {
@@ -339,17 +345,17 @@ class ClamavPlugin extends GenericPlugin {
 			} else {
 				$virusName = $this->_clamscanFile($absolutePath);
 			}
-		} catch (\Exception $e) {
+                //if scanning fails, set error to block file submission unless the plugin is in permissive mode
+		} catch (ClamScanFailureException  $e) {
 			$allowUnscanned = $this->getSetting(\PKP\core\PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles');
-			if (!$allowUnscanned) {
+			if ($allowUnscanned !== self::UNSCANNED_ALLOW) {
 				$errors['file'] = __(
-					'plugins.generic.clamav.uploadBlocked',
-					['threatname' => $e->getMessage()]
+					'plugins.generic.clamav.error'
 				);
 			}
 			return false;
 		}
-
+                //If a virus is found, populate Submission::Validate's error array, blocking file submission
 		if ($virusName !== false) {
 			$errors['file'] = __(
 				'plugins.generic.clamav.uploadBlocked',
