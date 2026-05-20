@@ -50,7 +50,7 @@ class ClamavPlugin extends GenericPlugin {
 			return true;
 		if ($success && $this->getEnabled()) {
 			// Enable Clam AV's preprocessing of uploaded files
-			Hook::add('submissionfilesuploadform::validate', array($this, 'clamscanHandleUpload'));
+			Hook::add('SubmissionFile::validate', array($this, 'clamscanHandleUpload'));
 			// Create handler for AJAX call
 			Hook::add('LoadHandler', array($this, 'setPageHandler'));
 		}
@@ -105,6 +105,9 @@ class ClamavPlugin extends GenericPlugin {
 		switch ($request->getUserVar('verb')) {
 			case 'settings':
 				$context = Application::get()->getRequest()->getContext();
+				if (!$context) {
+					return false;
+				}
 				$contextID = $context->getId();
 
 				$templateMgr = TemplateManager::getManager($request);
@@ -150,8 +153,8 @@ class ClamavPlugin extends GenericPlugin {
 		}
 		if ($type === self::TYPE_EXECUTABLE && !empty($path) && is_executable($path)) {
 			$version = exec($path . ' --version');
-			if (preg_match('/^ClamAV .*/', $version)) {
-				return $version;
+			if (preg_match('/^ClamAV (.+)/', $version, $matches)) {
+				return $matches[1];
 			}
 		} else if ($type === self::TYPE_SOCKET && !empty($path)) {
 			$output = '';
@@ -168,7 +171,7 @@ class ClamavPlugin extends GenericPlugin {
 				// \0 is null character.
 				stream_socket_sendto($clamDaemon, "zVERSION\0");
 				$output = $this->_clamDaemonShortPolling($clamDaemon);
-				return $output;
+				return $output['message'];
 			}
 
 		}
@@ -266,7 +269,9 @@ class ClamavPlugin extends GenericPlugin {
 				return false;
 			}
 			if($output['safe'] === false) {
-				return $output['message'];
+				$msg = trim($output['message']);
+				$msg = preg_replace('/\s*FOUND$/', '', $msg);
+				return $msg;
 			}
 		}
 		throw new ClamScanFailureException("ClamAV Daemon failed to scan the file");
@@ -297,62 +302,68 @@ class ClamavPlugin extends GenericPlugin {
 					return Array('safe' => false, 'message' => substr($output, 11));
 				}
 			}
-			throw new ClamScanFailureException("ClamAV failed to scan the file");
 		}
+		throw new ClamScanFailureException("ClamAV failed to scan the file");
 	}
 
 	/**
 	 * Hook callback: scan an uploaded file with ClamAV
-	 * @see submissionfilesuploadform::validate()
+	 * @see \PKP\submissionFile\Repository::validate()
+	 * @param string $hookName
+	 * @param array $args [&$errors, $object, $props, $allowedLocales, $submissionLocale]
+	 *   - $errors array passed by reference; add key/value pairs to block file submission
+	 *   - $props array new/updated properties including fileId
 	 */
-	function clamscanHandleUpload($hookName, $args) {
-		$uploadedFile = $_FILES['uploadedFile']['tmp_name'];
-		//scan for viruses if file exists
-		if (null !== $uploadedFile) {
-			$useSocket = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavUseSocket');
-			$rejectionMessage = array();
-			try {
-				if ($useSocket === true) {
-					$message = $this->_clamDaemonFile($uploadedFile);
-				} else {
-					$tempFileManager = new TemporaryFileManager();
-					$request = Application::get()->getRequest();
-					$user = $request->getUser();
-					$userId = $user->getId();
-					$fileId = $tempFileManager->createTempFileFromExisting($uploadedFile, $userId);
-					$file = $tempFileManager->getFile($fileId, $userId);
-					$tempFilePath = $file->getFilePath();
-					$message = $this->_clamscanFile($tempFilePath);
-					$tempFileManager->deleteById($fileId, $userId);
-				}
-				//No viruses found! Continue with submission
-				if ($message !== false) {
-					//ClamAV reported a virus or failed to complete the scan
-					//Prepare to notify the user and halt the upload process
-					$rejectionMessage = ["threatname"=>$message];
-					//If Clam found a virus, it will return the signature name as a string
-					if ($message == true) {
-						//create a user notification
-						$args[0]->addError('clamAV::virusDetected', __('plugins.generic.clamav.uploadBlocked',$rejectionMessage));
-					}
-				}
-			}
-			//Scanning errors will generate a custom exception
-			catch (ClamScanFailureException $e){
-				//Couldn't scan, but ClamAV plugin settings are permissive, continue with submission anyway
-				$setting=$this->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles');
-				if ( $this->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles')!==self::UNSCANNED_ALLOW) {
-					//Otherwise notify the user that there was an error
-					//the user will see the general error message from the locale file
-					$args[0]->addError('clamAV::failedToSCan', __('plugins.generic.clamav.error'));
-				}
-			}
 
-			//The file is considered unsafe. Interrupt submission process and clean up the working copy/metadata
-			$args[1] = false;
+	function clamscanHandleUpload($hookName, $args) {
+		$errors =& $args[0];
+		$props  = $args[2];
+		//scan for viruses if file exists
+		$fileId = $props['fileId'] ?? null;
+		if (!$fileId) {
 			return false;
-			
 		}
+
+		$file = app()->get('file')->get($fileId);
+		if (!$file) {
+			return false;
+		}
+
+		$filesDir = \PKP\config\Config::getVar('files', 'files_dir');
+		$absolutePath = rtrim($filesDir, '/') . '/' . $file->path;
+
+		if (!file_exists($absolutePath)) {
+			return false;
+		}
+		//If using ClamAV daemon 
+		$useSocket = $this->getSetting(\PKP\core\PKPApplication::CONTEXT_SITE, 'clamavUseSocket');
+
+		try {
+			if ($useSocket == true) {
+				$virusName = $this->_clamDaemonFile($absolutePath);
+			} else {
+				$virusName = $this->_clamscanFile($absolutePath);
+			}
+		//if scanning fails, set error to block file submission unless the plugin is in permissive mode
+		} catch (ClamScanFailureException  $e) {
+			$allowUnscanned = $this->getSetting(\PKP\core\PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles');
+			if ($allowUnscanned !== self::UNSCANNED_ALLOW) {
+				$errors['file'] = __(
+					'plugins.generic.clamav.error'
+				);
+			}
+			return false;
+		}
+		//If a virus is found, populate Submission::Validate's error array, blocking file submission
+		if ($virusName !== false) {
+			$errors['file'] = __(
+				'plugins.generic.clamav.uploadBlocked',
+				['threatname' => $virusName]
+			);
+			return false;
+		}
+
+		return false;
 	}
 
 	/**
