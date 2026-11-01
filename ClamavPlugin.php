@@ -227,9 +227,6 @@ class ClamavPlugin extends GenericPlugin {
 		$tmpFile = fopen($uploadedFile, 'rb');
 
 		if ($clamDaemon && $tmpFile) {
-			// clamd wants non-blocking socket connections
-			stream_set_blocking($clamDaemon, false);
-
 			// begin IDSESSION with clamd. z prefix indicates null delimiter.
 			// \0 is null character.
 			stream_socket_sendto($clamDaemon, "zIDSESSION\0");
@@ -256,6 +253,10 @@ class ClamavPlugin extends GenericPlugin {
 			// terminating INSTREAM with zero-length chunk
 			$data = pack("N", "");
 			stream_socket_sendto($clamDaemon, $data);
+
+			// Send in blocking mode so no chunk is dropped when the socket buffer
+			// is full; switch to non-blocking only for polling the result
+			stream_set_blocking($clamDaemon, false);
 
 			// wait for output
 			$output = $this->_clamDaemonShortPolling($clamDaemon);
