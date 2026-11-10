@@ -164,14 +164,20 @@ class ClamavPlugin extends GenericPlugin {
 			$clamDaemon = stream_socket_client("$path", $errno, $errorMessage);
 
 			if ($clamDaemon) {
-				// clamd wants non-blocking socket connections
-				stream_set_blocking($clamDaemon, false);
-
-				// get version of clamd
-				// \0 is null character.
-				stream_socket_sendto($clamDaemon, "zVERSION\0");
-				$output = $this->_clamDaemonShortPolling($clamDaemon);
-				return $output['message'];
+				try {
+					// get version of clamd
+					// \0 is null character.
+					$this->_clamDaemonWrite($clamDaemon, "zVERSION\0");
+					stream_set_blocking($clamDaemon, false);
+					$output = $this->_clamDaemonShortPolling($clamDaemon);
+				} catch (ClamScanFailureException $e) {
+					return '';
+				} finally {
+					fclose($clamDaemon);
+				}
+				if (preg_match('/^ClamAV (.+)/', $output, $matches)) {
+					return $matches[1];
+				}
 			}
 
 		}
@@ -211,97 +217,122 @@ class ClamavPlugin extends GenericPlugin {
 	/**
 	 * Private helper method to scan a file using the clamav daemon
 	 * @param $uploadedFile string The path to the file to be scanned
-	 * @return boolean|string
+	 * @throws ClamScanFailureException
+	 * @return boolean|string False if the file is clean, otherwise the virus signature name
 	 */
 	function _clamDaemonFile($uploadedFile) {
 		$clamavSocketPath = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketPath');
 		$maxInstreamSize = 1024; // TODO: need to universalize this based on a plugin setting
-		$output = "";
 		$errno = 0;
 		$errorMessage = "";
 
+		// open file for reading in binary mode
+		$tmpFile = fopen($uploadedFile, 'rb');
+		if (!$tmpFile) {
+			throw new ClamScanFailureException("ClamAV Daemon failed to open the file");
+		}
 		// stream_socket_client() seems to be preferred over older socket
 		// connections nowadays
 		$clamDaemon = stream_socket_client("$clamavSocketPath", $errno, $errorMessage);
-		// open file for reading in binary mode
-		$tmpFile = fopen($uploadedFile, 'rb');
+		if (!$clamDaemon) {
+			fclose($tmpFile);
+			throw new ClamScanFailureException("ClamAV Daemon failed to connect: $errorMessage");
+		}
 
-		if ($clamDaemon && $tmpFile) {
+		try {
 			// begin IDSESSION with clamd. z prefix indicates null delimiter.
 			// \0 is null character.
-			stream_socket_sendto($clamDaemon, "zIDSESSION\0");
+			$this->_clamDaemonWrite($clamDaemon, "zIDSESSION\0");
 
 			/*
 			 * INSTREAM begins data stream for virus scanning. Data is sent
 			 * in chunks, with format <length><data> where <length> is the size
 			 * of the following data in bytes expressed as a 4-byte unsigned
 			 * integer in network byte order.
-			 * 
+			 *
 			 * We're using pack() to generate the big-endian-formatted numbers.
-			 * 
-			 * As per the clamd man page, clamd requires a non-blocking
-			 * connection which means we need to roll our own polling solution--
-			 * this is managed by _clamDaemonShortPolling().
+			 *
+			 * The data is sent in blocking mode so that no chunk is dropped when
+			 * the socket buffer is full. The reply is then read in non-blocking
+			 * mode, managed by _clamDaemonShortPolling().
 			 */
-			stream_socket_sendto($clamDaemon, "zINSTREAM\0");
+			$this->_clamDaemonWrite($clamDaemon, "zINSTREAM\0");
 
 			while (!feof($tmpFile)) {
 				$data = fread($tmpFile, $maxInstreamSize);
-				$package = pack("N", strlen($data)).$data;
-				stream_socket_sendto($clamDaemon, $package);
+				if ($data === false) {
+					throw new ClamScanFailureException("ClamAV Daemon failed to read the file");
+				}
+				$this->_clamDaemonWrite($clamDaemon, pack("N", strlen($data)).$data);
 			}
 			// terminating INSTREAM with zero-length chunk
-			$data = pack("N", "");
-			stream_socket_sendto($clamDaemon, $data);
+			$this->_clamDaemonWrite($clamDaemon, pack("N", 0));
 
-			// Send in blocking mode so no chunk is dropped when the socket buffer
-			// is full; switch to non-blocking only for polling the result
 			stream_set_blocking($clamDaemon, false);
 
 			// wait for output
 			$output = $this->_clamDaemonShortPolling($clamDaemon);
 
 			// closing IDSESSION
-			stream_socket_sendto($clamDaemon, "nEND\0");
-
+			$this->_clamDaemonWrite($clamDaemon, "zEND\0");
+		} finally {
 			fclose($tmpFile);
 			fclose($clamDaemon);
-			if($output['safe'] === true) {
-				return false;
-			}
-			if($output['safe'] === false) {
-				$msg = trim($output['message']);
-				$msg = preg_replace('/\s*FOUND$/', '', $msg);
-				return $msg;
-			}
 		}
-		throw new ClamScanFailureException("ClamAV Daemon failed to scan the file");
+
+		// Replies within an IDSESSION are prefixed with the request id, e.g. "1: stream: OK"
+		if (preg_match('/^\d+: stream: OK$/', $output)) {
+			return false;
+		}
+		if (preg_match('/^\d+: stream: (.+) FOUND$/', $output, $matches)) {
+			return $matches[1];
+		}
+		throw new ClamScanFailureException("ClamAV Daemon failed to scan the file: $output");
+	}
+
+	/**
+	 * Private helper method to write all data to a clamd socket
+	 * @param $socket stream resource The streaming socket resource, in blocking mode.
+	 * @param $data string The data to write.
+	 * @throws ClamScanFailureException
+	 */
+	function _clamDaemonWrite($socket, $data) {
+		$length = strlen($data);
+		$written = 0;
+		while ($written < $length) {
+			$bytes = fwrite($socket, substr($data, $written));
+			if ($bytes === false || $bytes === 0) {
+				throw new ClamScanFailureException("ClamAV Daemon connection failed while sending data");
+			}
+			$written += $bytes;
+		}
 	}
 
 	/**
 	 * Private helper method to manage short polling a socket and return output
-	 * @param $socket stream resource The streaming socket resource.
+	 * @param $socket stream resource The streaming socket resource, in non-blocking mode.
 	 * @param $delay int Time between short polls, measured in nanoseconds
-	 * @param $intervals int Number of intervals to check; after $intervals checks, return.
 	 * @throws ClamScanFailureException
-	 * @return string
+	 * @return string The clamd reply without its null terminator
 	 */
-	function _clamDaemonShortPolling($socket, $delay = 100000000, $intervals = 10) {
+	function _clamDaemonShortPolling($socket, $delay = 100000000) {
 		// author's note: cludge cludge cludge cludge. TODO: look into long polling for unix sockets?
 		$output = "";
-		$intervals = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketTimeout')*10;
-		$failover = $this->getSetting(PKPApplication::CONTEXT_SITE, 'allowUnscannedFiles');
-		
+		$timeout = (int) $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavSocketTimeout');
+		$intervals = (int) ceil($timeout * 1000000000 / $delay);
+
 		for ($i = 0; $i < $intervals; $i++) {
 			// sleep() does not accept fractional seconds and usleep uses a surprising amount of CPU, leaving us with time_nanosleep().
 			time_nanosleep(0, $delay);
-			$output = stream_get_contents($socket);
-			if ($output !== "") {
-				if($output == "1: stream: OK\0") {
-					return Array('safe' => true, 'message' => $output);
-				} else {
-					return Array('safe' => false, 'message' => substr($output, 11));
-				}
+			$chunk = stream_get_contents($socket);
+			if ($chunk === false) {
+				throw new ClamScanFailureException("ClamAV Daemon connection failed while reading the reply");
+			}
+			$output .= $chunk;
+			// with the z prefix, clamd terminates each reply with a null character
+			$end = strpos($output, "\0");
+			if ($end !== false) {
+				return substr($output, 0, $end);
 			}
 		}
 		throw new ClamScanFailureException("ClamAV failed to scan the file");
