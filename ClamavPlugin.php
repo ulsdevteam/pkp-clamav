@@ -189,17 +189,16 @@ class ClamavPlugin extends GenericPlugin {
 			$output = "";
 			$exitCode = "";
 			$clamAVPath = $this->getSetting(PKPApplication::CONTEXT_SITE, 'clamavPath');
-			$scan = exec($clamAVPath . ' --no-summary -i ' . $uploadedFile, $output, $exitCode);
+			$scan = exec($clamAVPath . ' --no-summary -i ' . escapeshellarg($uploadedFile), $output, $exitCode);
 			//process the result
-			preg_match('/:(.*)/',$output[0],$matches);
-			$virusID=trim($matches[1]);
 			switch ($exitCode) {
 				//clean
 				case 0:
 					return false;
 				//virus found!
-				case 1: 
-					return $virusID;
+				case 1:
+					preg_match('/:(.*)/', $output[0] ?? '', $matches);
+					return trim($matches[1] ?? 'unknown');
 				//failed to scan
 				case 2:
 				default:
